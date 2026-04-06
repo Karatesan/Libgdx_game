@@ -1,0 +1,52 @@
+package com.karatesan.game.ecs.systems;
+
+import com.badlogic.ashley.core.ComponentMapper;
+import com.badlogic.ashley.core.Entity;
+import com.badlogic.ashley.core.Family;
+import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.math.MathUtils;
+import com.karatesan.game.ecs.components.physics.MovementComponent;
+import com.karatesan.game.ecs.components.physics.TransformComponent;
+import com.karatesan.game.ecs.components.physics.VelocityComponent;
+import com.karatesan.game.ecs.components.tag.EnemyComponent;
+import com.karatesan.game.ecs.utility.ECSUtils;
+
+public class EnemySystem extends IteratingSystem {
+
+    private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
+    private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
+    private final ComponentMapper<MovementComponent> mm = ComponentMapper.getFor(MovementComponent.class);
+
+    private Entity playerEntity;
+
+    public EnemySystem() {
+        super(Family.all(EnemyComponent.class, TransformComponent.class, VelocityComponent.class).get());
+    }
+
+    @Override
+    public void update(float deltaTime) {
+        // 1. Find the player BEFORE we loop through the enemies.
+        // We ask the engine for all entities with a PlayerComponent.
+        playerEntity = ECSUtils.getPlayer(getEngine());
+
+        // 2. Now run the normal loop for all enemies
+        super.update(deltaTime);
+    }
+
+    @Override
+    protected void processEntity(Entity entity, float deltaTime) {
+        if (playerEntity == null) return; // Don't move if there is no player
+
+        TransformComponent enemyPos = tm.get(entity);
+        VelocityComponent enemyVel = vm.get(entity);
+        TransformComponent playerPos = tm.get(playerEntity);
+        MovementComponent movement = mm.get(entity);
+
+        // Calculate angle to player
+        float angleRad = MathUtils.atan2(playerPos.y - enemyPos.y, playerPos.x - enemyPos.x);
+
+        // Move toward player at 100 units per second
+        enemyVel.x = MathUtils.cos(angleRad) * movement.maxSpeed;
+        enemyVel.y = MathUtils.sin(angleRad) * movement.maxSpeed;
+    }
+}
