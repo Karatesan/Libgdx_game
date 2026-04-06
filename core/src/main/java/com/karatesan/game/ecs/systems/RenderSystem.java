@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.CharArray;
 import com.karatesan.game.ecs.components.UI.FloatingTextComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
 import com.karatesan.game.ecs.components.render.ShapeComponent;
@@ -27,6 +28,9 @@ public class RenderSystem extends IteratingSystem {
     private final BitmapFont bitmapFont;
     private final OrthographicCamera camera;
 
+    // 1. ADD THIS: The single shared memory buffer for all text rendering
+    private final CharArray sharedText = new CharArray();
+
     public RenderSystem(SpriteBatch batch, ShapeDrawer shapeDrawer, BitmapFont font, OrthographicCamera camera) {
         // Process anything that has a TransformComponent
         super(Family.all(TransformComponent.class).get());
@@ -38,14 +42,11 @@ public class RenderSystem extends IteratingSystem {
 
     @Override
     public void update(float deltaTime) {
-        // This runs ONCE per frame before iterating through entities
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        // This triggers processEntity() for every valid entity
         super.update(deltaTime);
 
-        // This runs ONCE per frame after all entities are drawn
         batch.end();
     }
 
@@ -56,7 +57,6 @@ public class RenderSystem extends IteratingSystem {
         FloatingTextComponent text = txtm.get(entity);
 
         if (shape != null) {
-
             // 1. Draw the base shape for EVERY entity (Player, Bullet, Enemy)
             shapeDrawer.setColor(shape.color);
             shapeDrawer.filledCircle(transform.x, transform.y, transform.size / 2);
@@ -70,15 +70,26 @@ public class RenderSystem extends IteratingSystem {
 
                 // 3. Draw the gun barrel (a thick white line)
                 shapeDrawer.setColor(Color.WHITE);
-                shapeDrawer.line(startX, startY, endX, endY, 4f); // 4f is the line thickness
+                shapeDrawer.line(startX, startY, endX, endY, 4f);
             }
         } else if (text != null) {
+            // --- ZERO-GC FOUNTAIN TEXT RENDERING ---
 
+            // A. Wipe the shared memory buffer (O(1) operation)
+            sharedText.clear();
+
+            // B. Append the raw integer (No Strings created!)
+            sharedText.append(text.damageValue);
+
+            // C. Set color and draw directly from the buffer
             bitmapFont.setColor(text.color);
-            bitmapFont.draw(batch, text.text, transform.x, transform.y);
-            //reset color to white if we draw red crit - because it woudl cause ui to draw red
+            bitmapFont.getData().setScale(text.scale); // <--- SCALE IT HERE
+
+            bitmapFont.draw(batch, sharedText, transform.x, transform.y);
+
+            // D. Reset color to white so we don't tint the UI
             bitmapFont.setColor(Color.WHITE);
+            bitmapFont.getData().setScale(1f); // <--- RESET IT HERE
         }
     }
 }
-

@@ -185,19 +185,32 @@ public class EntityFactory {
     public void createDamageText(Entity enemy, float damage, boolean isCrit) {
         Entity text = engine.createEntity();
 
+        // 1. Setup Lifetime
         LifeTimeComponent lifetime = engine.createComponent(LifeTimeComponent.class);
-        lifetime.timer = .5f;
-        lifetime.maxTime = .5f;
+        lifetime.timer = 0.5f;
+        lifetime.maxTime = 0.5f;
 
+        // 2. Setup Text Data (Store INT, not String)
         FloatingTextComponent txt = engine.createComponent(FloatingTextComponent.class);
-
-        TransformComponent transform = engine.createComponent(TransformComponent.class);
-
-        txt.text = String.valueOf(MathUtils.round(damage));
+        txt.damageValue = MathUtils.round(damage);
         txt.color = isCrit ? Color.RED : Color.WHITE;
-        txt.anchorEntity = enemy;
-        text.add(lifetime).add(txt).add(transform);
 
+        txt.scale = isCrit ? 1f : .75f;
+
+        // 3. Setup Position (Copy enemy's current position)
+        TransformComponent enemyPos = enemy.getComponent(TransformComponent.class);
+        TransformComponent transform = engine.createComponent(TransformComponent.class);
+        transform.x = enemyPos.x + MathUtils.random(-15f, 15f);
+        transform.y = enemyPos.y + 20f + MathUtils.random(-15f, 15f);
+
+        // 4. Setup "Fountain" Velocity (Jitter)
+        VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
+        // Explode randomly left or right
+        velocity.x = MathUtils.random(-15f, 15f);
+        // Always float up, but at random speeds
+        velocity.y = MathUtils.random(20f, 40f);
+
+        text.add(lifetime).add(txt).add(transform).add(velocity);
         engine.addEntity(text);
     }
 }
