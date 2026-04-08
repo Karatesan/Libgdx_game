@@ -21,6 +21,7 @@ public class Main extends Game {
     ShapeDrawer shapeDrawer;
 
     public BitmapFont uiFont;
+    public Texture floorTexture;
 
 
     @Override
@@ -36,12 +37,16 @@ public class Main extends Game {
         pixmap.dispose();
         this.shapeDrawer = new ShapeDrawer(spriteBatch, textureRegion);
 
+        //Ground
+        floorTexture = new Texture(Gdx.files.internal("ui/Floor.jpg"));
+        floorTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+
         //Font
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("ui/Font.ttf"));
 
         // 2. Set the parameters (Size, Color, etc.)
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 24; // 24 pixels tall
+        parameter.size = 48; // 24 pixels tall
         parameter.color = Color.WHITE;
         parameter.borderWidth = 2f; // A nice black outline makes text readable on any background!
         parameter.borderColor = Color.BLACK;
@@ -65,6 +70,7 @@ public class Main extends Game {
         spriteBatch.dispose();
         textureRegion.getTexture().dispose();
         uiFont.dispose();
+        floorTexture.dispose();
         super.dispose();
     }
 

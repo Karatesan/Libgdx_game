@@ -12,10 +12,13 @@ import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.tag.DeadComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
+import com.karatesan.game.ecs.systems.waveSystem.WaveSpawnerSystem;
 import com.karatesan.game.ecs.utility.State;
 
 public class GameStateSystem extends EntitySystem {
     private final ComponentMapper<SessionComponent> sm = ComponentMapper.getFor(SessionComponent.class);
+    private float waveChangeTime = 60f; // Alternatively, put this inside SessionComponent
+
 
     private Entity sessionEntity;
 
@@ -28,19 +31,30 @@ public class GameStateSystem extends EntitySystem {
 
     @Override
     public void update(float deltaTime) {
-        SessionComponent sessionComponent = sm.get(sessionEntity);
+        SessionComponent session = sm.get(sessionEntity);
         PooledEngine engine = (PooledEngine) getEngine();
 
-        if (sessionComponent.currentState == State.PLAYING) {
+        if (session.currentState == State.PLAYING) {
             // Check if the player was tagged with FatalDamage this frame
             ImmutableArray<Entity> deadPlayers = engine.getEntitiesFor(Family.all(FatalDamageComponent.class).get());
             if (deadPlayers.size() > 0) {
-                setGameState(State.GAME_OVER, sessionComponent);
+                setGameState(State.GAME_OVER, session);
             }
-        } else if (sessionComponent.currentState == State.GAME_OVER) {
+            //updates for wave manager
+            if (session.waveTextTimer > 0) {
+                session.waveTextTimer -= deltaTime;
+            }
+            session.timeSurvived += deltaTime;
+
+            int calculatedWave = (int) (session.timeSurvived / waveChangeTime) + 1;
+            if (calculatedWave > session.currentWave) {
+                session.currentWave = calculatedWave;
+                session.waveTextTimer = 3f; // Trigger the UI text
+            }
+        } else if (session.currentState == State.GAME_OVER) {
             // Listen for the Restart button
             if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-                restartGame(engine, sessionComponent);
+                restartGame(engine, session);
             }
         }
     }

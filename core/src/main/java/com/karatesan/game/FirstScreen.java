@@ -1,14 +1,13 @@
 package com.karatesan.game;
 
-import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.karatesan.game.ecs.factory.EntityFactory;
 import com.karatesan.game.ecs.systems.*;
+import com.karatesan.game.ecs.systems.waveSystem.WaveSpawnerSystem;
 
 /**
  * First screen of the application. Displayed after the application is created.
@@ -46,17 +45,18 @@ public class FirstScreen implements Screen {
         entityFactory.createSession();
 
         engine.addSystem(new PlayerInputSystem(camera));
-        engine.addSystem(new MovementSystem());
         engine.addSystem(new WeaponSystem(entityFactory));
         engine.addSystem(new InvincibilitySystem());
         engine.addSystem(new EnemySystem());
+        engine.addSystem(new EnemySeparationSystem());
+        engine.addSystem(new MovementSystem());
         engine.addSystem(new BulletSystem());
         engine.addSystem(new CollisionSystem(entityFactory));
         engine.addSystem(new BulletLifecycleSystem());
         engine.addSystem(new CameraSystem(camera));
         engine.addSystem(new GameStateSystem());
         //engine.addSystem(new FloatingTextSystem());
-        engine.addSystem(new RenderSystem(game.spriteBatch, game.shapeDrawer, game.uiFont, camera));
+        engine.addSystem(new RenderSystem(game.spriteBatch, game.shapeDrawer, game.uiFont, camera, game.floorTexture));
         engine.addSystem(new UISystem(game.spriteBatch, game.uiFont, uiCamera));
         engine.addSystem(new WaveSpawnerSystem(entityFactory));
         engine.addSystem(new ScoreSystem());
@@ -96,5 +96,5 @@ public class FirstScreen implements Screen {
         engine.removeAllEntities();
     }
 
-    public enum State { PLAYING, GAME_OVER }
+    public enum State {PLAYING, GAME_OVER}
 }

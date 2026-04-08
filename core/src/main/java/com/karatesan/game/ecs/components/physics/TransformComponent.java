@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool.Poolable;
 public class TransformComponent implements Component, Poolable {
     public float x;
     public float y;
+    public int z;
     public float rotation;
     public float size;
 
@@ -15,5 +16,6 @@ public class TransformComponent implements Component, Poolable {
         y = 0;
         rotation = 0;
         size = 0;
+        z = 0;
     }
 }
