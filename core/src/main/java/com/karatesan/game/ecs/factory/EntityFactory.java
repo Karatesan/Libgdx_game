@@ -15,7 +15,14 @@ import com.karatesan.game.ecs.components.render.ShapeComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
 
+import static com.karatesan.game.ecs.factory.EnemyType.*;
+
 public class EntityFactory {
+    private static final float[] OFFSET_X = {-13f, 0f, 13f, -19f, 19f, -10f, 10f, 0f};
+    private static final float[] OFFSET_Y = {15f, 20f, 15f, 5f, 5f, 30f, 30f, 5f};
+    private static final Color[] colors = {Color.RED, Color.BLUE, Color.FIREBRICK, Color.DARK_GRAY, Color.FOREST};
+    private int textOffsetIndex = 0;
+
     private final PooledEngine engine;
 
     public EntityFactory(PooledEngine engine) {
@@ -43,6 +50,7 @@ public class EntityFactory {
         // Set the starting data
         transform.x = 400;
         transform.y = 300;
+        transform.z = 1;
         transform.size = 32;
         // Velocity starts at 0, the InputSystem will change it!
         velocity.x = 0;
@@ -66,44 +74,60 @@ public class EntityFactory {
         player.add(health);
         player.add(hitbox);
 
-        equipShotgun(player);
+        equipMachineGun(player);
 
         // Add the finished Entity to the Engine
         engine.addEntity(player);
     }
 
-    public void createEnemy(float x, float y) {
+    public void createEnemy(float x, float y, EnemyType type) {
         Entity enemy = engine.createEntity();
+
+        // 1. Base Components (Every enemy gets these)
+        enemy.add(engine.createComponent(EnemyComponent.class));
 
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.x = x;
         transform.y = y;
-        transform.size = 32;
 
         VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
 
-        ShapeComponent shape = engine.createComponent(ShapeComponent.class);
-        shape.color = com.badlogic.gdx.graphics.Color.RED; // Enemies are red!
-
-        EnemyComponent enemyTag = engine.createComponent(EnemyComponent.class);
-
+        // 2. Variable Components (These change based on the type!)
         HealthComponent health = engine.createComponent(HealthComponent.class);
-        health.maxHp = 100f;
-        health.currentHp = 100f;
-
-        HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
-        hitbox.radius = 16f; // Half of size 32
-
         MovementComponent movement = engine.createComponent(MovementComponent.class);
-        movement.maxSpeed = 50f;
+        HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
+        ShapeComponent shape = engine.createComponent(ShapeComponent.class);
 
-        enemy.add(transform);
-        enemy.add(velocity);
-        enemy.add(shape);
-        enemy.add(enemyTag);
-        enemy.add(health);
-        enemy.add(hitbox);
-        enemy.add(movement);
+        // 3. The Data-Driven Configuration
+        switch (type) {
+            case STANDARD:
+                health.maxHp = 20f;
+                movement.maxSpeed = 100f;
+                hitbox.radius = 15f;
+                transform.size = 30f; // Visual size (Diameter)
+                shape.color = Color.WHITE;
+                break;
+
+            case SWARMER:
+                health.maxHp = 5f; // Dies in 1 hit usually
+                movement.maxSpeed = 220f; // Extremely fast!
+                hitbox.radius = 8f; // Harder to hit
+                transform.size = 16f;
+                shape.color = Color.RED; // Red = Danger/Fast
+                break;
+
+            case TANK:
+                health.maxHp = 150f; // Bullet sponge
+                movement.maxSpeed = 40f; // Very slow, creeping doom
+                hitbox.radius = 35f; // Massive body blocks bullets
+                transform.size = 70f;
+                shape.color = Color.ROYAL; // Purple/Blue = Heavy
+                break;
+        }
+
+        health.currentHp = health.maxHp;
+
+        enemy.add(transform).add(velocity).add(health).add(movement).add(hitbox).add(shape);
 
         engine.addEntity(enemy);
     }
@@ -146,6 +170,7 @@ public class EntityFactory {
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.x = x;
         transform.y = y;
+        transform.z = 2;
         transform.size = 8;
 
         VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
@@ -200,15 +225,25 @@ public class EntityFactory {
         // 3. Setup Position (Copy enemy's current position)
         TransformComponent enemyPos = enemy.getComponent(TransformComponent.class);
         TransformComponent transform = engine.createComponent(TransformComponent.class);
-        transform.x = enemyPos.x + MathUtils.random(-15f, 15f);
-        transform.y = enemyPos.y + 20f + MathUtils.random(-15f, 15f);
+        transform.x = enemyPos.x + OFFSET_X[textOffsetIndex];
+        transform.y = enemyPos.y + OFFSET_Y[textOffsetIndex];
+        transform.z = 3;
 
         // 4. Setup "Fountain" Velocity (Jitter)
         VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
-        // Explode randomly left or right
-        velocity.x = MathUtils.random(-15f, 15f);
-        // Always float up, but at random speeds
-        velocity.y = MathUtils.random(20f, 40f);
+        // Multiply the X offset by 1.5.
+        // If it spawned at -20 (left), it flies left at -30 speed.
+        // If it spawned at +30 (right), it flies right at +45 speed.
+        velocity.x = OFFSET_X[textOffsetIndex] * 0.35f;
+
+        // Give it a base upward speed (40f), plus a little extra based on its Y offset.
+        // Higher spawning numbers will fly slightly faster so they don't get rear-ended.
+        velocity.y = 10f + (OFFSET_Y[textOffsetIndex] * 0.27f);
+
+        textOffsetIndex++;
+        if (textOffsetIndex >= OFFSET_X.length) {
+            textOffsetIndex = 0;
+        }
 
         text.add(lifetime).add(txt).add(transform).add(velocity);
         engine.addEntity(text);

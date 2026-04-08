@@ -6,4 +6,9 @@ import com.karatesan.game.ecs.utility.State;
 public class SessionComponent implements Component {
     public State currentState = State.PLAYING;
     public int kilLCount = 0;
+
+    // --- NEW WAVE DATA ---
+    public float timeSurvived = 0f;
+    public int currentWave = 1;
+    public float waveTextTimer = 3f; // How long to display "WAVE X" on screen
 }

@@ -5,6 +5,7 @@ import com.badlogic.ashley.core.Engine;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -23,18 +24,9 @@ public class UISystem extends IteratingSystem {
     private final BitmapFont font;
     private final OrthographicCamera uiCamera;
     private Entity sessionEntity;
-    private CharArray UIText = new CharArray();
+    private final CharArray UIText = new CharArray();
 
-    @Override
-    public void addedToEngine(Engine engine) {
-        super.addedToEngine(engine);
-        // Find the one and only Session Entity and cache it!
-        sessionEntity = engine.getEntitiesFor(Family.all(SessionComponent.class).get()).first();
-    }
-
-    // We pass in the tools from Main and the uiCamera from FirstScreen
     public UISystem(SpriteBatch batch, BitmapFont font, OrthographicCamera uiCamera) {
-        // This system only cares about the Player (to read their health)
         super(Family.all(PlayerComponent.class, HealthComponent.class).get());
         this.batch = batch;
         this.font = font;
@@ -42,36 +34,74 @@ public class UISystem extends IteratingSystem {
     }
 
     @Override
-    public void update(float deltaTime) {
-        // 1. Tell the batch to use the UI Camera's static coordinates
-        batch.setProjectionMatrix(uiCamera.combined);
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        sessionEntity = engine.getEntitiesFor(Family.all(SessionComponent.class).get()).first();
+    }
 
-        // 2. Begin drawing the HUD
+    @Override
+    public void update(float deltaTime) {
+        batch.setProjectionMatrix(uiCamera.combined);
         batch.begin();
 
-        // 3. This triggers processEntity() to find the player and draw their stats
-        super.update(deltaTime);
+        super.update(deltaTime); // Draws Player HP
 
         SessionComponent session = sm.get(sessionEntity);
+
+        // --- DRAW KILL COUNT (Top Right) ---
         UIText.clear();
         UIText.append("Killed: ").append(session.kilLCount);
+        font.getData().setScale(.5f);
         font.draw(batch, UIText, 700, 580);
+        font.getData().setScale(1f);
 
+        // --- DRAW CLOCK (Top Center) ZERO GC ---
+        int totalSeconds = (int) session.timeSurvived;
+        int minutes = totalSeconds / 60;
+        int seconds = totalSeconds % 60;
+
+        UIText.clear();
+        UIText.append(minutes).append(":");
+        if (seconds < 10) UIText.append("0"); // Add leading zero (e.g., 1:05)
+        UIText.append(seconds);
+        font.getData().setScale(.5f); // Make it big!
+
+        // Assuming 800x600 screen, center is ~380
+        font.draw(batch, UIText, 380, 580);
+        font.getData().setScale(1f); // Make it big!
+
+        // --- DRAW WAVE ANNOUNCEMENT ---
+        if (session.waveTextTimer > 0) {
+            UIText.clear();
+            UIText.append("WAVE ").append(session.currentWave);
+
+            // Make it yellow and draw it in the center of the screen
+            font.setColor(Color.YELLOW);
+            font.draw(batch, UIText, 340, 400);
+
+            // Reset font settings
+            font.setColor(Color.WHITE);
+        }
+
+        // --- DRAW GAME OVER ---
         if (session.currentState == State.GAME_OVER) {
-            // Hardcoded coordinates to roughly center the text on an 800x600 screen
+            font.setColor(Color.RED);
             font.draw(batch, "GAME OVER", 320, 350);
+            font.setColor(Color.WHITE);
             font.draw(batch, "Press 'R' to Restart", 280, 300);
         }
-        // 4. Finish drawing
+
         batch.end();
     }
 
     @Override
     protected void processEntity(Entity player, float deltaTime) {
         HealthComponent health = hm.get(player);
-        // X: 20 (left edge), Y: 580 (near the top of our 800x600 viewport)
         UIText.clear();
         UIText.append("HP: ").append((int) health.currentHp).append("/").append((int) health.maxHp);
+        font.getData().setScale(.5f);
         font.draw(batch, UIText, 20, 580);
+        font.getData().setScale(1f);
+
     }
 }
