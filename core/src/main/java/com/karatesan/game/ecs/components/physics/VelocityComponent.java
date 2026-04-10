@@ -6,11 +6,13 @@ import com.badlogic.gdx.utils.Pool.Poolable;
 public class VelocityComponent implements Component, Poolable {
     public float x;
     public float y;
+    public float speed;
 
 
     @Override
     public void reset() {
         x = 0;
         y = 0;
+        speed = 0;
     }
 }

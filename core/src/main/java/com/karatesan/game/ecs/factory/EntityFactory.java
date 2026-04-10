@@ -4,9 +4,15 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
-import com.karatesan.game.ecs.components.*;
-import com.karatesan.game.ecs.components.UI.FloatingTextComponent;
+import com.karatesan.game.ecs.components.perks.RicochetPerkComponent;
+import com.karatesan.game.ecs.components.render.FloatingTextComponent;
 import com.karatesan.game.ecs.components.combat.*;
+import com.karatesan.game.ecs.components.core.LifeTimeComponent;
+import com.karatesan.game.ecs.components.core.SessionComponent;
+import com.karatesan.game.ecs.components.economy.CollectibleComponent;
+import com.karatesan.game.ecs.components.economy.MagnetComponent;
+import com.karatesan.game.ecs.components.economy.PullableComponent;
+import com.karatesan.game.ecs.components.economy.XpComponent;
 import com.karatesan.game.ecs.components.physics.HitboxComponent;
 import com.karatesan.game.ecs.components.physics.MovementComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
@@ -14,8 +20,6 @@ import com.karatesan.game.ecs.components.physics.VelocityComponent;
 import com.karatesan.game.ecs.components.render.ShapeComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
-
-import static com.karatesan.game.ecs.factory.EnemyType.*;
 
 public class EntityFactory {
     private static final float[] OFFSET_X = {-13f, 0f, 13f, -19f, 19f, -10f, 10f, 0f};
@@ -74,6 +78,7 @@ public class EntityFactory {
         player.add(health);
         player.add(hitbox);
         player.add(engine.createComponent(MagnetComponent.class));
+        player.add(engine.createComponent(RicochetPerkComponent.class));
 
         equipMachineGun(player);
 
@@ -157,11 +162,11 @@ public class EntityFactory {
     public void equipMachineGun(Entity player) {
         player.remove(WeaponComponent.class);
         WeaponComponent weapon = engine.createComponent(WeaponComponent.class);
-        weapon.minDamage = 15f;
-        weapon.maxDamage = 20f;
+        weapon.minDamage = 6f;
+        weapon.maxDamage = 9f;
         weapon.fireRate = 0.1f; // Super fast!
         weapon.projectileCount = 1;
-        weapon.spreadAngle = 5f; // Slight inaccuracy
+        weapon.spreadAngle = 8f; // Slight inaccuracy
         weapon.projectileSpeed = 800f;
         weapon.range = 1000f;
 
@@ -183,6 +188,7 @@ public class EntityFactory {
         VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
         velocity.x = MathUtils.cos(angleRad) * speed;
         velocity.y = MathUtils.sin(angleRad) * speed;
+        velocity.speed = speed;
 
         ShapeComponent shape = engine.createComponent(ShapeComponent.class);
         shape.color = isCrit ? Color.RED : Color.YELLOW; // Make crits look cool!

@@ -3,7 +3,7 @@ package com.karatesan.game.ecs.systems.waveSystem;
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.math.MathUtils;
-import com.karatesan.game.ecs.components.SessionComponent;
+import com.karatesan.game.ecs.components.core.SessionComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
