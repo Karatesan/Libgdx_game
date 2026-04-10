@@ -54,12 +54,15 @@ public class FirstScreen implements Screen {
         engine.addSystem(new CollisionSystem(entityFactory));
         engine.addSystem(new BulletLifecycleSystem());
         engine.addSystem(new CameraSystem(camera));
+        engine.addSystem(new MagnetSystem());
+        engine.addSystem(new PickupSystem());
+        engine.addSystem(new XpProcessingSystem());
         engine.addSystem(new GameStateSystem());
         //engine.addSystem(new FloatingTextSystem());
         engine.addSystem(new RenderSystem(game.spriteBatch, game.shapeDrawer, game.uiFont, camera, game.floorTexture));
-        engine.addSystem(new UISystem(game.spriteBatch, game.uiFont, uiCamera));
+        engine.addSystem(new UISystem(game.spriteBatch, game.uiFont, game.shapeDrawer, uiCamera));
         engine.addSystem(new WaveSpawnerSystem(entityFactory));
-        engine.addSystem(new ScoreSystem());
+        engine.addSystem(new DeathSystem(entityFactory));
         engine.addSystem(new LifeTimeSystem());
         engine.addSystem(new CleanupSystem());
     }

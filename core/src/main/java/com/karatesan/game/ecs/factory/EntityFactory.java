@@ -73,6 +73,7 @@ public class EntityFactory {
         player.add(movement);
         player.add(health);
         player.add(hitbox);
+        player.add(engine.createComponent(MagnetComponent.class));
 
         equipMachineGun(player);
 
@@ -83,8 +84,6 @@ public class EntityFactory {
     public void createEnemy(float x, float y, EnemyType type) {
         Entity enemy = engine.createEntity();
 
-        // 1. Base Components (Every enemy gets these)
-        enemy.add(engine.createComponent(EnemyComponent.class));
 
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.x = x;
@@ -98,6 +97,9 @@ public class EntityFactory {
         HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
         ShapeComponent shape = engine.createComponent(ShapeComponent.class);
 
+        // 1. Base Components (Every enemy gets these)
+        EnemyComponent enemyComp = engine.createComponent(EnemyComponent.class);
+
         // 3. The Data-Driven Configuration
         switch (type) {
             case STANDARD:
@@ -106,6 +108,7 @@ public class EntityFactory {
                 hitbox.radius = 15f;
                 transform.size = 30f; // Visual size (Diameter)
                 shape.color = Color.WHITE;
+                enemyComp.xpDropValue = 3f;
                 break;
 
             case SWARMER:
@@ -114,6 +117,7 @@ public class EntityFactory {
                 hitbox.radius = 8f; // Harder to hit
                 transform.size = 16f;
                 shape.color = Color.RED; // Red = Danger/Fast
+                enemyComp.xpDropValue = 1f;
                 break;
 
             case TANK:
@@ -122,12 +126,13 @@ public class EntityFactory {
                 hitbox.radius = 35f; // Massive body blocks bullets
                 transform.size = 70f;
                 shape.color = Color.ROYAL; // Purple/Blue = Heavy
+                enemyComp.xpDropValue = 15f;
                 break;
         }
 
         health.currentHp = health.maxHp;
 
-        enemy.add(transform).add(velocity).add(health).add(movement).add(hitbox).add(shape);
+        enemy.add(transform).add(velocity).add(health).add(movement).add(hitbox).add(shape).add(enemyComp);
 
         engine.addEntity(enemy);
     }
@@ -178,7 +183,7 @@ public class EntityFactory {
         VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
         velocity.x = MathUtils.cos(angleRad) * speed;
         velocity.y = MathUtils.sin(angleRad) * speed;
-        
+
         ShapeComponent shape = engine.createComponent(ShapeComponent.class);
         shape.color = isCrit ? Color.RED : Color.YELLOW; // Make crits look cool!
 
@@ -249,5 +254,32 @@ public class EntityFactory {
 
         text.add(lifetime).add(txt).add(transform).add(velocity);
         engine.addEntity(text);
+    }
+
+    public void createXpDrop(float x, float y, float value) {
+        Entity xp = engine.createEntity();
+
+        TransformComponent transform = engine.createComponent(TransformComponent.class);
+        transform.x = x;
+        transform.y = y;
+        // A 1 XP crystal is small (8.5f). A 15 XP crystal from a Tank is large (15.5f)!
+        transform.size = 8f + (value * 0.5f);
+
+        XpComponent xpComp = engine.createComponent(XpComponent.class);
+        xpComp.value = value;
+
+        HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
+        hitbox.radius = transform.size / 2f;
+
+        ShapeComponent shape = engine.createComponent(ShapeComponent.class);
+        shape.color = com.badlogic.gdx.graphics.Color.CYAN; // Classic glowing XP color
+
+        // We add velocity so the MagnetSystem can pull it later
+        VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
+
+        xp.add(engine.createComponent(PullableComponent.class));
+        xp.add(engine.createComponent(CollectibleComponent.class));
+        xp.add(transform).add(xpComp).add(hitbox).add(shape).add(velocity);
+        engine.addEntity(xp);
     }
 }

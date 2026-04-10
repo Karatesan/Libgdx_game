@@ -14,6 +14,7 @@ import com.karatesan.game.ecs.components.combat.HealthComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
 import com.karatesan.game.ecs.components.SessionComponent;
 import com.karatesan.game.ecs.utility.State;
+import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class UISystem extends IteratingSystem {
 
@@ -22,13 +23,15 @@ public class UISystem extends IteratingSystem {
 
     private final SpriteBatch batch;
     private final BitmapFont font;
+    private final ShapeDrawer shapeDrawer;
     private final OrthographicCamera uiCamera;
     private Entity sessionEntity;
     private final CharArray UIText = new CharArray();
 
-    public UISystem(SpriteBatch batch, BitmapFont font, OrthographicCamera uiCamera) {
+    public UISystem(SpriteBatch batch, BitmapFont font, ShapeDrawer shapeDrawer, OrthographicCamera uiCamera) {
         super(Family.all(PlayerComponent.class, HealthComponent.class).get());
         this.batch = batch;
+        this.shapeDrawer = shapeDrawer;
         this.font = font;
         this.uiCamera = uiCamera;
     }
@@ -90,6 +93,33 @@ public class UISystem extends IteratingSystem {
             font.setColor(Color.WHITE);
             font.draw(batch, "Press 'R' to Restart", 280, 300);
         }
+
+        // --- DRAW XP BAR (Top Center) ---
+        // Stop drawing the shapeDrawer if batch is running, or ensure your ShapeDrawer is using the same batch
+        // Assuming your ShapeDrawer is accessible here (you might need to pass it into UISystem constructor like you did for RenderSystem)
+
+        float barWidth = 400f;
+        float barHeight = 15f;
+        float barX = 200f; // Centers it on an 800px wide screen
+        float barY = 580f; // Right at the top
+
+        // Calculate how full the bar is (0.0 to 1.0)
+        float fillRatio = session.currentXp / session.xpToNextLevel;
+
+        // 1. Draw Background (Dark Gray)
+        // Note: Make sure you pass your ShapeDrawer into the UISystem constructor!
+        shapeDrawer.setColor(Color.DARK_GRAY);
+        shapeDrawer.filledRectangle(barX, barY, barWidth, barHeight);
+
+        // 2. Draw Fill (Cyan)
+        shapeDrawer.setColor(Color.CYAN);
+        shapeDrawer.filledRectangle(barX, barY, barWidth * fillRatio, barHeight);
+
+        // 3. Draw Level Text next to the bar
+        UIText.clear();
+        UIText.append("LVL ").append(session.currentLevel);
+        font.setColor(Color.WHITE);
+        font.draw(batch, UIText, barX - 60, barY + 12);
 
         batch.end();
     }
