@@ -8,7 +8,7 @@ import com.karatesan.game.ecs.components.core.LifeTimeComponent;
 import com.karatesan.game.ecs.components.render.FloatingTextComponent;
 import com.karatesan.game.ecs.components.tag.DeadComponent;
 
-public class LifeTimeSystem extends IteratingSystem {
+public class LifeTimeSystem extends IteratingSystem implements PausableSystem{
     private final ComponentMapper<LifeTimeComponent> lm = ComponentMapper.getFor(LifeTimeComponent.class);
 
     public LifeTimeSystem() {

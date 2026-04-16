@@ -6,9 +6,11 @@ import com.badlogic.gdx.utils.Pool;
 
 public class HitEventComponent implements Component, Pool.Poolable {
     public Entity targetEntity; // The enemy we hit
+    public Entity bullet;
 
     @Override
     public void reset() {
         targetEntity = null;
+        bullet = null;
     }
 }

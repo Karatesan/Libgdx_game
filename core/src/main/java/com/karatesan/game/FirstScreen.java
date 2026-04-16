@@ -1,17 +1,21 @@
 package com.karatesan.game;
 
 import com.badlogic.ashley.core.PooledEngine;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.karatesan.game.ecs.factory.EntityFactory;
 import com.karatesan.game.ecs.systems.combat.*;
+import com.karatesan.game.ecs.systems.combat.perks.RicochetPerkSystem;
 import com.karatesan.game.ecs.systems.core.CameraSystem;
 import com.karatesan.game.ecs.systems.core.CleanupSystem;
 import com.karatesan.game.ecs.systems.core.GameStateSystem;
 import com.karatesan.game.ecs.systems.core.LifeTimeSystem;
 import com.karatesan.game.ecs.systems.economy.MagnetSystem;
+import com.karatesan.game.ecs.systems.economy.PerkApplicationSystem;
 import com.karatesan.game.ecs.systems.economy.PickupSystem;
 import com.karatesan.game.ecs.systems.economy.XpProcessingSystem;
 import com.karatesan.game.ecs.systems.movement.EnemySeparationSystem;
@@ -33,7 +37,7 @@ public class FirstScreen implements Screen {
     private OrthographicCamera uiCamera;
     private ExtendViewport uiViewport;
     private EntityFactory entityFactory;
-    public State gameState = State.PLAYING;
+    private Stage uiStage;
 
     // The heart of our new architecture
     private PooledEngine engine;
@@ -48,9 +52,15 @@ public class FirstScreen implements Screen {
         // Our game world is 800x600 units
         viewport = new ExtendViewport(800, 600, camera);
 
+        //UI -------------------------------------------------------
         uiCamera = new OrthographicCamera();
         uiViewport = new ExtendViewport(800, 600, uiCamera);
+        // ... your existing camera/viewport setup ...
+        uiStage = new Stage(uiViewport, game.spriteBatch);
+        // CRITICAL: Route input to the UI Stage
+        Gdx.input.setInputProcessor(uiStage);
 
+        //ECS -----------------------------------------------------
         engine = new PooledEngine();
         entityFactory = new EntityFactory(engine);
 
@@ -71,10 +81,13 @@ public class FirstScreen implements Screen {
         engine.addSystem(new MagnetSystem());
         engine.addSystem(new PickupSystem());
         engine.addSystem(new XpProcessingSystem());
+        engine.addSystem(new PerkApplicationSystem(game.perkRegistry));
         engine.addSystem(new GameStateSystem());
         engine.addSystem(new RenderSystem(game.spriteBatch, game.shapeDrawer, game.uiFont, camera, game.floorTexture));
-        engine.addSystem(new UISystem(game.spriteBatch, game.uiFont, game.shapeDrawer, uiViewport));
+        engine.addSystem(
+            new UISystem(game.spriteBatch, game.uiFont, game.shapeDrawer, uiViewport, uiStage, game.perkRegistry));
         engine.addSystem(new WaveSpawnerSystem(entityFactory));
+        // engine.addSystem(new CooldownSystem());
         engine.addSystem(new DeathSystem(entityFactory));
         engine.addSystem(new LifeTimeSystem());
         engine.addSystem(new CleanupSystem());
@@ -87,8 +100,12 @@ public class FirstScreen implements Screen {
         viewport.apply();
         // 3. Tell the batch to use the Camera's coordinates
         game.spriteBatch.setProjectionMatrix(camera.combined);
-
         engine.update(delta);
+
+        //draw UI on top
+        uiViewport.apply();
+        uiStage.act(delta);
+        uiStage.draw();
     }
 
     @Override

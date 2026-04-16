@@ -5,8 +5,9 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.karatesan.game.ecs.components.combat.InvincibilityComponent;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 
-public class InvincibilitySystem extends IteratingSystem {
+public class InvincibilitySystem extends IteratingSystem implements PausableSystem {
     private final ComponentMapper<InvincibilityComponent> im = ComponentMapper.getFor(InvincibilityComponent.class);
 
     public InvincibilitySystem() {

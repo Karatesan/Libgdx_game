@@ -11,9 +11,10 @@ import com.karatesan.game.ecs.components.event.DeathEventComponent;
 import com.karatesan.game.ecs.components.core.SessionComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.factory.EntityFactory;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 
 //Handles enemy death
-public class DeathSystem extends IteratingSystem {
+public class DeathSystem extends IteratingSystem implements PausableSystem {
 
     private final ComponentMapper<SessionComponent> sm = ComponentMapper.getFor(SessionComponent.class);
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);

@@ -8,8 +8,9 @@ import com.karatesan.game.ecs.components.combat.WeaponComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
 import com.karatesan.game.ecs.factory.EntityFactory;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 
-public class WeaponSystem extends IteratingSystem {
+public class WeaponSystem extends IteratingSystem implements PausableSystem {
 
     private final EntityFactory entityFactory;
     private final ComponentMapper<TransformComponent> tc = ComponentMapper.getFor(TransformComponent.class);
@@ -34,27 +35,30 @@ public class WeaponSystem extends IteratingSystem {
         weapon.shootTimer += deltaTime;
 
         if (player.isShooting && weapon.shootTimer >= weapon.fireRate) {
-
             for (int i = 0; i < weapon.projectileCount; i++) {
-                boolean isCrit = MathUtils.random() <= stats.critChance;
-                float damage = calculateDamage(weapon.minDamage, weapon.maxDamage, stats, isCrit);
-
-                // 1. Calculate the starting angle (in degrees)
-                float baseAngleDeg = transform.rotation;
-
-                float angleOffset = 0;
-                if (weapon.projectileCount > 1) {
-                    // 'i' is your current loop index
-                    float fraction = (float) i / (weapon.projectileCount - 1);
-                    angleOffset = (fraction - 0.5f) * weapon.spreadAngle;
-                }
-                // Apply the offset and convert back to radians for the bullet velocity math
-                float finalAngleRad = (baseAngleDeg + angleOffset) * MathUtils.degreesToRadians;
-                entityFactory.createBullet(transform.x, transform.y, finalAngleRad, weapon.projectileSpeed, damage, weapon.range,
-                    isCrit);
+                shootAndCreateBullet(stats, weapon, transform, (float) i);
             }
             weapon.shootTimer = 0;
         }
+    }
+
+    private void shootAndCreateBullet(StatsComponent stats, WeaponComponent weapon, TransformComponent transform, float i) {
+        boolean isCrit = MathUtils.random() <= stats.critChance;
+        float damage = calculateDamage(weapon.minDamage, weapon.maxDamage, stats, isCrit);
+
+        // 1. Calculate the starting angle (in degrees)
+        float baseAngleDeg = transform.rotation;
+
+        float angleOffset = 0;
+        if (weapon.projectileCount > 1) {
+            // 'i' is your current loop index
+            float fraction = i / (weapon.projectileCount - 1);
+            angleOffset = (fraction - 0.5f) * weapon.spreadAngle;
+        }
+        // Apply the offset and convert back to radians for the bullet velocity math
+        float finalAngleRad = (baseAngleDeg + angleOffset) * MathUtils.degreesToRadians;
+        entityFactory.createBullet(transform.x, transform.y, finalAngleRad, weapon.projectileSpeed, damage, weapon.range,
+            isCrit);
     }
 
     private float calculateDamage(float minDamage, float maxDamage, StatsComponent stats, boolean isCrit) {

@@ -24,6 +24,7 @@ public class RenderSystem extends SortedIteratingSystem {
     private final ComponentMapper<PlayerComponent> pm = ComponentMapper.getFor(PlayerComponent.class);
     private final ComponentMapper<ShapeComponent> sm = ComponentMapper.getFor(ShapeComponent.class);
     private final ComponentMapper<FloatingTextComponent> txtm = ComponentMapper.getFor(FloatingTextComponent.class);
+    private final ComponentMapper<BulletComponent> bm = ComponentMapper.getFor(BulletComponent.class);
 
     private final SpriteBatch batch;
     private final ShapeDrawer shapeDrawer;
@@ -36,7 +37,6 @@ public class RenderSystem extends SortedIteratingSystem {
 
     private static class ZComparator implements java.util.Comparator<Entity> {
         private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
-        private final ComponentMapper<BulletComponent> bm = ComponentMapper.getFor(BulletComponent.class);
 
         @Override
         public int compare(Entity e1, Entity e2) {
@@ -109,20 +109,39 @@ public class RenderSystem extends SortedIteratingSystem {
     }
 
     private void renderGenericShape(Entity entity, ShapeComponent shape, TransformComponent transform) {
-        // 1. Draw the base shape for EVERY entity (Player, Bullet, Enemy)
-        shapeDrawer.setColor(shape.color);
-        shapeDrawer.filledCircle(transform.x, transform.y, transform.size / 2);
 
-        // 2. If it happens to be the player, draw the gun barrel on top
-        if (pm.has(entity)) {
-            float startX = transform.x + MathUtils.cosDeg(transform.rotation) * transform.size / 2;
-            float startY = transform.y + MathUtils.sinDeg(transform.rotation) * transform.size / 2;
-            float endX = startX + MathUtils.cosDeg(transform.rotation) * transform.size / 2;
-            float endY = startY + MathUtils.sinDeg(transform.rotation) * transform.size / 2;
+        BulletComponent bullet = bm.get(entity);
+        if (bm.has(entity)) {
+            // --- RENDER AS HIGH-SPEED TRACER ---
 
-            // 3. Draw the gun barrel (a thick white line)
+            // 1. Draw the "Smoke/Ghost Trail" connecting the start point to the bullet
+            // We use a low alpha (0.3f) so it looks like a fading streak left behind
+            //shapeDrawer.setColor(shape.color.r, shape.color.g, shape.color.b, 0.3f);
+            //shapeDrawer.line(bullet.startX, bullet.startY, transform.x, transform.y, transform.size / 2f);
+
+            // 2. Draw the "Hot Core" (A brighter, thinner line in the center of the smoke)
+            //shapeDrawer.setColor(shape.color.r, shape.color.g, shape.color.b, 0.8f);
+            //shapeDrawer.line(bullet.startX, bullet.startY, transform.x, transform.y, transform.size / 6f);
+
+            // 3. Draw the actual bullet head at the very front
             shapeDrawer.setColor(Color.WHITE);
-            shapeDrawer.line(startX, startY, endX, endY, 4f);
+            shapeDrawer.filledCircle(transform.x, transform.y, transform.size / 2f);
+
+        } else {
+            shapeDrawer.setColor(shape.color);
+            shapeDrawer.filledCircle(transform.x, transform.y, transform.size / 2);
+
+            // 2. If it happens to be the player, draw the gun barrel on top
+            if (pm.has(entity)) {
+                float startX = transform.x + MathUtils.cosDeg(transform.rotation) * transform.size / 2;
+                float startY = transform.y + MathUtils.sinDeg(transform.rotation) * transform.size / 2;
+                float endX = startX + MathUtils.cosDeg(transform.rotation) * transform.size / 2;
+                float endY = startY + MathUtils.sinDeg(transform.rotation) * transform.size / 2;
+
+                // 3. Draw the gun barrel (a thick white line)
+                shapeDrawer.setColor(Color.WHITE);
+                shapeDrawer.line(startX, startY, endX, endY, 4f);
+            }
         }
     }
 

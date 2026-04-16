@@ -8,9 +8,10 @@ import com.karatesan.game.ecs.components.economy.PullableComponent;
 import com.karatesan.game.ecs.components.economy.MagnetComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 import com.karatesan.game.ecs.utility.ECSUtils;
 
-public class MagnetSystem extends IteratingSystem {
+public class MagnetSystem extends IteratingSystem implements PausableSystem {
 
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);

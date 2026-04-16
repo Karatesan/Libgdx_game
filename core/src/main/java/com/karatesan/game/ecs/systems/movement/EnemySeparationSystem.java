@@ -6,8 +6,9 @@ import com.karatesan.game.ecs.components.physics.HitboxComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 
-public class EnemySeparationSystem extends EntitySystem {
+public class EnemySeparationSystem extends EntitySystem implements PausableSystem {
 
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private final ComponentMapper<HitboxComponent> hm = ComponentMapper.getFor(HitboxComponent.class);

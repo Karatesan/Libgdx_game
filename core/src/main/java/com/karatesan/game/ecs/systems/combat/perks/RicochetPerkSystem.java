@@ -1,4 +1,4 @@
-package com.karatesan.game.ecs.systems.combat;
+package com.karatesan.game.ecs.systems.combat.perks;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Engine;
@@ -19,8 +19,9 @@ import com.karatesan.game.ecs.components.render.ShapeComponent;
 import com.karatesan.game.ecs.components.tag.DeadComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 
-public class RicochetPerkSystem extends IteratingSystem {
+public class RicochetPerkSystem extends IteratingSystem implements PausableSystem {
 
     // Mappers for the Bullet
     private final ComponentMapper<HitEventComponent> hm = ComponentMapper.getFor(HitEventComponent.class);
@@ -90,10 +91,11 @@ public class RicochetPerkSystem extends IteratingSystem {
 
                     BulletComponent bulletData = bulletEntity.getComponent(BulletComponent.class);
                     bulletData.distanceTravelled = 0;
+                    bulletData.startX = targetTx.x;
+                    bulletData.startY = targetTx.y;
                     // 6. Apply the speed to the new normalized direction
                     bulletVel.x = TEMP_VECTOR.x * bulletVel.speed;
                     bulletVel.y = TEMP_VECTOR.y * bulletVel.speed;
-                    System.out.println("Ricochet:  enemy: "+ targetTx.x + ", "+ targetTx.y +  ", bulletV: "+ bulletVel.x +", " +bulletVel.y);
 
                     // 7. Grant the Pardon!
                     // This tells the BulletLifecycleSystem (which runs later) NOT to kill this bullet.

@@ -1,0 +1,229 @@
+[
+  {
+    "id": "high_caliber",
+    "name": "High Caliber",
+    "description": "Packs your magazines with heavier, more damaging rounds.",
+    "maxLevel": 5,
+    "levels": [
+      { "level": 1, "levelUpDescription": "Increases base damage by 10%.", "effects": [{ "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.1 }] },
+      { "level": 2, "levelUpDescription": "Increases base damage by 10%.", "effects": [{ "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.1 }] },
+      { "level": 3, "levelUpDescription": "Increases minimum and maximum damage by 5.", "effects": [{ "type": "STAT_MODIFIER", "target": "minDamage", "value": 5.0 }, { "type": "STAT_MODIFIER", "target": "maxDamage", "value": 5.0 }] },
+      { "level": 4, "levelUpDescription": "Increases base damage by 15%.", "effects": [{ "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.15 }] },
+      { "level": 5, "levelUpDescription": "Massive damage boost! +25% Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.25 }] }
+    ]
+  },
+  {
+    "id": "hair_trigger",
+    "name": "Hair Trigger",
+    "description": "Modifies your weapon's firing mechanism for rapid output.",
+    "maxLevel": 4,
+    "levels": [
+      { "level": 1, "levelUpDescription": "Reduces time between shots.", "effects": [{ "type": "STAT_MODIFIER", "target": "fireRate", "value": -0.05 }] },
+      { "level": 2, "levelUpDescription": "Reduces time between shots.", "effects": [{ "type": "STAT_MODIFIER", "target": "fireRate", "value": -0.05 }] },
+      { "level": 3, "levelUpDescription": "Reduces time between shots.", "effects": [{ "type": "STAT_MODIFIER", "target": "fireRate", "value": -0.05 }] },
+      { "level": 4, "levelUpDescription": "Fires incredibly fast! -0.1s Fire Rate.", "effects": [{ "type": "STAT_MODIFIER", "target": "fireRate", "value": -0.1 }] }
+    ]
+  },
+  {
+    "id": "scattershot",
+    "name": "Scattershot",
+    "description": "More bullets, more chaos. Who needs to aim?",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "Fires +1 Projectile, increases spread.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "spreadAngle", "value": 15.0 }] },
+      { "level": 2, "levelUpDescription": "Fires +1 Projectile, increases spread.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "spreadAngle", "value": 15.0 }] },
+      { "level": 3, "levelUpDescription": "Fires +2 Projectiles! Wide spread.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 2.0 }, { "type": "STAT_MODIFIER", "target": "spreadAngle", "value": 30.0 }] }
+    ]
+  },
+  {
+    "id": "surgical_precision",
+    "name": "Surgical Precision",
+    "description": "Find the weak spots and exploit them.",
+    "maxLevel": 5,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+5% Critical Hit Chance.", "effects": [{ "type": "STAT_MODIFIER", "target": "critChance", "value": 0.05 }] },
+      { "level": 2, "levelUpDescription": "+5% Critical Hit Chance.", "effects": [{ "type": "STAT_MODIFIER", "target": "critChance", "value": 0.05 }] },
+      { "level": 3, "levelUpDescription": "+50% Critical Damage Multiplier.", "effects": [{ "type": "STAT_MODIFIER", "target": "critMultiplier", "value": 0.5 }] },
+      { "level": 4, "levelUpDescription": "+10% Critical Hit Chance.", "effects": [{ "type": "STAT_MODIFIER", "target": "critChance", "value": 0.1 }] },
+      { "level": 5, "levelUpDescription": "+100% Critical Damage Multiplier!", "effects": [{ "type": "STAT_MODIFIER", "target": "critMultiplier", "value": 1.0 }] }
+    ]
+  },
+  {
+    "id": "long_barrel",
+    "name": "Long Barrel",
+    "description": "Increases the effective range and velocity of your shots.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "Increases bullet speed and range.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileSpeed", "value": 100.0 }, { "type": "STAT_MODIFIER", "target": "range", "value": 150.0 }] },
+      { "level": 2, "levelUpDescription": "Increases bullet speed and range.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileSpeed", "value": 100.0 }, { "type": "STAT_MODIFIER", "target": "range", "value": 150.0 }] },
+      { "level": 3, "levelUpDescription": "Bullets fly extremely fast and far.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileSpeed", "value": 200.0 }, { "type": "STAT_MODIFIER", "target": "range", "value": 300.0 }] }
+    ]
+  },
+  {
+    "id": "depleted_uranium",
+    "name": "Depleted Uranium",
+    "description": "Heavy, dense rounds that tear through multiple targets.",
+    "maxLevel": 4,
+    "levels": [
+      { "level": 1, "levelUpDescription": "Bullets pierce 1 additional enemy.", "effects": [{ "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 1.0 }] },
+      { "level": 2, "levelUpDescription": "Bullets pierce 1 additional enemy.", "effects": [{ "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 1.0 }] },
+      { "level": 3, "levelUpDescription": "Bullets pierce 1 additional enemy.", "effects": [{ "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 1.0 }] },
+      { "level": 4, "levelUpDescription": "Bullets pierce 2 additional enemies!", "effects": [{ "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 2.0 }] }
+    ]
+  },
+  {
+    "id": "bouncing_chaos",
+    "name": "Bouncing Chaos",
+    "description": "Bullets are coated in a hyper-elastic polymer.",
+    "maxLevel": 4,
+    "levels": [
+      { "level": 1, "levelUpDescription": "15% chance to ricochet to a nearby enemy.", "effects": [{ "type": "TRAIT_ADDITION", "target": "RICOCHET_CHANCE", "value": 0.15 }] },
+      { "level": 2, "levelUpDescription": "+10% ricochet chance.", "effects": [{ "type": "TRAIT_ADDITION", "target": "RICOCHET_CHANCE", "value": 0.10 }] },
+      { "level": 3, "levelUpDescription": "+15% ricochet chance.", "effects": [{ "type": "TRAIT_ADDITION", "target": "RICOCHET_CHANCE", "value": 0.15 }] },
+      { "level": 4, "levelUpDescription": "+20% ricochet chance! (60% total)", "effects": [{ "type": "TRAIT_ADDITION", "target": "RICOCHET_CHANCE", "value": 0.20 }] }
+    ]
+  },
+  {
+    "id": "explosive_rounds",
+    "name": "Explosive Rounds",
+    "description": "Miniature warheads packed into every bullet.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "Bullets have a chance to explode on impact.", "effects": [{ "type": "TRAIT_ADDITION", "target": "EXPLOSIVE", "value": 0.15 }] },
+      { "level": 2, "levelUpDescription": "Increases explosion chance.", "effects": [{ "type": "TRAIT_ADDITION", "target": "EXPLOSIVE", "value": 0.15 }] },
+      { "level": 3, "levelUpDescription": "Massive explosion chance! (45% total)", "effects": [{ "type": "TRAIT_ADDITION", "target": "EXPLOSIVE", "value": 0.15 }] }
+    ]
+  },
+  {
+    "id": "heavy_ordnance",
+    "name": "Heavy Ordnance",
+    "description": "Sacrifice fire rate for devastating, slow-moving power.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+30% Damage, but slower Fire Rate.", "effects": [{ "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.3 }, { "type": "STAT_MODIFIER", "target": "fireRate", "value": 0.1 }] },
+      { "level": 2, "levelUpDescription": "+30% Damage, but slower Fire Rate.", "effects": [{ "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.3 }, { "type": "STAT_MODIFIER", "target": "fireRate", "value": 0.1 }] },
+      { "level": 3, "levelUpDescription": "+50% Damage, massive projectiles.", "effects": [{ "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.5 }, { "type": "STAT_MODIFIER", "target": "fireRate", "value": 0.15 }] }
+    ]
+  },
+  {
+    "id": "bullet_hose",
+    "name": "Bullet Hose",
+    "description": "Quantity over quality. Fill the screen with lead.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+1 Projectile, much faster Fire Rate, -10% Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "fireRate", "value": -0.1 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": -0.1 }] },
+      { "level": 2, "levelUpDescription": "+1 Projectile, much faster Fire Rate, -10% Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "fireRate", "value": -0.1 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": -0.1 }] },
+      { "level": 3, "levelUpDescription": "+2 Projectiles! Maximum Fire Rate!", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 2.0 }, { "type": "STAT_MODIFIER", "target": "fireRate", "value": -0.2 }] }
+    ]
+  },
+  {
+    "id": "railgun_tech",
+    "name": "Railgun Tech",
+    "description": "Electromagnetically accelerated slugs that pierce and crit.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+1 Pierce, +200 Bullet Speed.", "effects": [{ "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "projectileSpeed", "value": 200.0 }] },
+      { "level": 2, "levelUpDescription": "+1 Pierce, +50% Crit Multiplier.", "effects": [{ "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "critMultiplier", "value": 0.5 }] },
+      { "level": 3, "levelUpDescription": "+2 Pierce, +100% Crit Multiplier!", "effects": [{ "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 2.0 }, { "type": "STAT_MODIFIER", "target": "critMultiplier", "value": 1.0 }] }
+    ]
+  },
+  {
+    "id": "wall_of_lead",
+    "name": "Wall of Lead",
+    "description": "Turns any weapon into a wide-angle shotgun.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+2 Projectiles, +45 Spread Angle, -50 Range.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 2.0 }, { "type": "STAT_MODIFIER", "target": "spreadAngle", "value": 45.0 }, { "type": "STAT_MODIFIER", "target": "range", "value": -50.0 }] },
+      { "level": 2, "levelUpDescription": "+2 Projectiles, +45 Spread Angle, -50 Range.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 2.0 }, { "type": "STAT_MODIFIER", "target": "spreadAngle", "value": 45.0 }, { "type": "STAT_MODIFIER", "target": "range", "value": -50.0 }] },
+      { "level": 3, "levelUpDescription": "+4 Projectiles! A true wall of lead.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 4.0 }, { "type": "STAT_MODIFIER", "target": "spreadAngle", "value": 60.0 }] }
+    ]
+  },
+  {
+    "id": "choke_tube",
+    "name": "Choke Tube",
+    "description": "Constricts bullet spread for highly focused damage.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "Reduces Spread Angle, +15% Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "spreadAngle", "value": -15.0 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.15 }] },
+      { "level": 2, "levelUpDescription": "Reduces Spread Angle, +15% Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "spreadAngle", "value": -15.0 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.15 }] },
+      { "level": 3, "levelUpDescription": "Zero Spread Angle. +30% Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "spreadAngle", "value": -30.0 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.3 }] }
+    ]
+  },
+  {
+    "id": "hypervelocity",
+    "name": "Hypervelocity",
+    "description": "Bullets travel so fast they deal kinetic shock damage.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+300 Bullet Speed, +5 Min Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileSpeed", "value": 300.0 }, { "type": "STAT_MODIFIER", "target": "minDamage", "value": 5.0 }] },
+      { "level": 2, "levelUpDescription": "+300 Bullet Speed, +5 Min Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileSpeed", "value": 300.0 }, { "type": "STAT_MODIFIER", "target": "minDamage", "value": 5.0 }] },
+      { "level": 3, "levelUpDescription": "+500 Bullet Speed! +10 Min Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileSpeed", "value": 500.0 }, { "type": "STAT_MODIFIER", "target": "minDamage", "value": 10.0 }] }
+    ]
+  },
+  {
+    "id": "lucky_strikes",
+    "name": "Lucky Strikes",
+    "description": "Sometimes you just hit the perfect spot.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+15% Crit Chance, -5% Base Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "critChance", "value": 0.15 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": -0.05 }] },
+      { "level": 2, "levelUpDescription": "+15% Crit Chance, -5% Base Damage.", "effects": [{ "type": "STAT_MODIFIER", "target": "critChance", "value": 0.15 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": -0.05 }] },
+      { "level": 3, "levelUpDescription": "+20% Crit Chance! No damage penalty.", "effects": [{ "type": "STAT_MODIFIER", "target": "critChance", "value": 0.2 }] }
+    ]
+  },
+  {
+    "id": "pinball_wizard",
+    "name": "Pinball Wizard",
+    "description": "Ricochets become faster and deadlier.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+1 Ricochet, +100 Bullet Speed.", "effects": [{ "type": "TRAIT_ADDITION", "target": "RICOCHET", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "projectileSpeed", "value": 100.0 }] },
+      { "level": 2, "levelUpDescription": "+1 Ricochet, +10% Damage.", "effects": [{ "type": "TRAIT_ADDITION", "target": "RICOCHET", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.1 }] },
+      { "level": 3, "levelUpDescription": "+2 Ricochets! +200 Bullet Speed.", "effects": [{ "type": "TRAIT_ADDITION", "target": "RICOCHET", "value": 2.0 }, { "type": "STAT_MODIFIER", "target": "projectileSpeed", "value": 200.0 }] }
+    ]
+  },
+  {
+    "id": "shrapnel_burst",
+    "name": "Shrapnel Burst",
+    "description": "Explosions and extra projectiles. Pure chaos.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+10% Explosive Chance, +1 Projectile.", "effects": [{ "type": "TRAIT_ADDITION", "target": "EXPLOSIVE", "value": 0.1 }, { "type": "STAT_MODIFIER", "target": "projectileCount", "value": 1.0 }] },
+      { "level": 2, "levelUpDescription": "+10% Explosive Chance, +1 Projectile.", "effects": [{ "type": "TRAIT_ADDITION", "target": "EXPLOSIVE", "value": 0.1 }, { "type": "STAT_MODIFIER", "target": "projectileCount", "value": 1.0 }] },
+      { "level": 3, "levelUpDescription": "+20% Explosive Chance, +2 Projectiles!", "effects": [{ "type": "TRAIT_ADDITION", "target": "EXPLOSIVE", "value": 0.2 }, { "type": "STAT_MODIFIER", "target": "projectileCount", "value": 2.0 }] }
+    ]
+  },
+  {
+    "id": "unstoppable_force",
+    "name": "Unstoppable Force",
+    "description": "Bullets that refuse to stop moving.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+1 Pierce, +15% Damage.", "effects": [{ "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.15 }] },
+      { "level": 2, "levelUpDescription": "+1 Pierce, +15% Damage.", "effects": [{ "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.15 }] },
+      { "level": 3, "levelUpDescription": "+2 Pierce, +30% Damage!", "effects": [{ "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 2.0 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.3 }] }
+    ]
+  },
+  {
+    "id": "assassins_mark",
+    "name": "Assassin's Mark",
+    "description": "When you hit a critical, you make sure they don't get back up.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+100% Crit Multiplier, slower Fire Rate.", "effects": [{ "type": "STAT_MODIFIER", "target": "critMultiplier", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "fireRate", "value": 0.1 }] },
+      { "level": 2, "levelUpDescription": "+100% Crit Multiplier, slower Fire Rate.", "effects": [{ "type": "STAT_MODIFIER", "target": "critMultiplier", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "fireRate", "value": 0.1 }] },
+      { "level": 3, "levelUpDescription": "+200% Crit Multiplier! One shot, one kill.", "effects": [{ "type": "STAT_MODIFIER", "target": "critMultiplier", "value": 2.0 }, { "type": "STAT_MODIFIER", "target": "fireRate", "value": 0.05 }] }
+    ]
+  },
+  {
+    "id": "omega_protocol",
+    "name": "Omega Protocol",
+    "description": "A highly experimental, unstable weapon modification.",
+    "maxLevel": 3,
+    "levels": [
+      { "level": 1, "levelUpDescription": "+1 Projectile, +1 Pierce, +1 Ricochet.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 1.0 }, { "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 1.0 }, { "type": "TRAIT_ADDITION", "target": "RICOCHET", "value": 1.0 }] },
+      { "level": 2, "levelUpDescription": "+10% Damage, +10% Crit Chance, +10% Explosive.", "effects": [{ "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 0.1 }, { "type": "STAT_MODIFIER", "target": "critChance", "value": 0.1 }, { "type": "TRAIT_ADDITION", "target": "EXPLOSIVE", "value": 0.1 }] },
+      { "level": 3, "levelUpDescription": "Adds +1 to EVERYTHING.", "effects": [{ "type": "STAT_MODIFIER", "target": "projectileCount", "value": 1.0 }, { "type": "TRAIT_ADDITION", "target": "PIERCE", "value": 1.0 }, { "type": "TRAIT_ADDITION", "target": "RICOCHET", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "damageMultiplier", "value": 1.0 }, { "type": "STAT_MODIFIER", "target": "critMultiplier", "value": 1.0 }] }
+    ]
+  }
+]

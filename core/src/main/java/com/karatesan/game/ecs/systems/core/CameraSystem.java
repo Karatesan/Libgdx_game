@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 
-public class CameraSystem extends IteratingSystem {
+public class CameraSystem extends IteratingSystem implements PausableSystem{
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private final OrthographicCamera camera;
 

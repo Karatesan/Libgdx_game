@@ -7,9 +7,10 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.Vector2;
 import com.karatesan.game.ecs.components.combat.BulletComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 
 //Handles bullet range expiration
-public class BulletSystem extends IteratingSystem {
+public class BulletSystem extends IteratingSystem implements PausableSystem {
 
     private final ComponentMapper<BulletComponent> bm = ComponentMapper.getFor(BulletComponent.class);
     private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);

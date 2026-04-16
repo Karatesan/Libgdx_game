@@ -9,8 +9,9 @@ import com.karatesan.game.ecs.components.core.LifeTimeComponent;
 import com.karatesan.game.ecs.components.event.PardonedComponent;
 import com.karatesan.game.ecs.components.tag.DeadComponent;
 import com.karatesan.game.ecs.components.event.HitEventComponent;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 
-public class BulletLifecycleSystem extends IteratingSystem {
+public class BulletLifecycleSystem extends IteratingSystem implements PausableSystem {
     private final ComponentMapper<PardonedComponent> pm = ComponentMapper.getFor(PardonedComponent.class);
 
     public BulletLifecycleSystem() {

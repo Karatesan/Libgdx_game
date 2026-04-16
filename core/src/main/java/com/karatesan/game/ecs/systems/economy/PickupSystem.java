@@ -10,9 +10,10 @@ import com.karatesan.game.ecs.components.economy.XpComponent;
 import com.karatesan.game.ecs.components.event.CollectedEventComponent;
 import com.karatesan.game.ecs.components.physics.HitboxComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 import com.karatesan.game.ecs.utility.ECSUtils;
 
-public class PickupSystem extends IteratingSystem {
+public class PickupSystem extends IteratingSystem implements PausableSystem {
 
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private final ComponentMapper<HitboxComponent> hm = ComponentMapper.getFor(HitboxComponent.class);

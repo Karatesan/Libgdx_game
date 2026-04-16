@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.karatesan.game.perks.PerkRegistry;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 /**
@@ -23,6 +24,8 @@ public class Main extends Game {
     public BitmapFont uiFont;
     public Texture floorTexture;
 
+    PerkRegistry perkRegistry;
+
 
     @Override
     public void create() {
@@ -30,7 +33,7 @@ public class Main extends Game {
 
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.WHITE);
-        pixmap.drawPixel(0,0);
+        pixmap.drawPixel(0, 0);
 
         Texture texture = new Texture(pixmap);
         this.textureRegion = new TextureRegion(texture);
@@ -61,6 +64,9 @@ public class Main extends Game {
 
         generator.dispose();
 
+        perkRegistry = new PerkRegistry(Gdx.files.internal("data/perks.json"));
+
+
         setScreen(new FirstScreen(this));
     }
 
@@ -75,7 +81,7 @@ public class Main extends Game {
     }
 
     @Override
-    public void render () {
+    public void render() {
         super.render();
     }
 }

@@ -14,8 +14,9 @@ import com.karatesan.game.ecs.components.physics.MovementComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 
-public class PlayerInputSystem extends IteratingSystem {
+public class PlayerInputSystem extends IteratingSystem implements PausableSystem {
 
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
@@ -48,12 +49,7 @@ public class PlayerInputSystem extends IteratingSystem {
         float angleInRadians = MathUtils.atan2(mousePos.y - transform.y, mousePos.x - transform.x);
         transform.rotation = angleInRadians * MathUtils.radiansToDegrees;
 
-
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
-            player.isShooting = true;
-        } else {
-            player.isShooting = false;
-        }
+        player.isShooting = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
     }
 
     private void processMovement(VelocityComponent velocity, float speed) {

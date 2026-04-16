@@ -9,9 +9,10 @@ import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
 import com.karatesan.game.ecs.factory.EnemyType;
 import com.karatesan.game.ecs.factory.EntityFactory;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 import com.karatesan.game.ecs.utility.State;
 
-public class WaveSpawnerSystem extends EntitySystem {
+public class WaveSpawnerSystem extends EntitySystem implements PausableSystem {
 
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private final ComponentMapper<SessionComponent> sm = ComponentMapper.getFor(SessionComponent.class);

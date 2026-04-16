@@ -14,9 +14,10 @@ import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.tag.DeadComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.factory.EntityFactory;
+import com.karatesan.game.ecs.systems.core.PausableSystem;
 import com.karatesan.game.ecs.utility.ECSUtils;
 
-public class CollisionSystem extends EntitySystem {
+public class CollisionSystem extends EntitySystem implements PausableSystem {
 
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private final ComponentMapper<HitboxComponent> hm = ComponentMapper.getFor(HitboxComponent.class);
