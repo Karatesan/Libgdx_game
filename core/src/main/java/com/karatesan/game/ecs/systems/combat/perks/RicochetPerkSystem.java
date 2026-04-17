@@ -43,7 +43,7 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
 
     public RicochetPerkSystem() {
         // We ONLY iterate over bullets that have just hit something
-        super(Family.all(BulletComponent.class, HitEventComponent.class, TransformComponent.class, VelocityComponent.class, ShapeComponent.class).get());
+        super(Family.all(HitEventComponent.class).get());
     }
 
     @Override
@@ -57,80 +57,80 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
         // 2. Cache the Live Array of Enemies
         // Ashley automatically keeps this array updated. We just hold the reference.
         // We exclude DeadComponent so bullets don't bounce toward corpses.
-        enemies = engine.getEntitiesFor(Family.all(EnemyComponent.class, TransformComponent.class)
-            .exclude(DeadComponent.class).get());
+        enemies = engine.getEntitiesFor(
+            Family.all(EnemyComponent.class, TransformComponent.class).exclude(DeadComponent.class).get());
     }
 
-        @Override
-        protected void processEntity(Entity bulletEntity, float deltaTime) {
-            // 1. Check if the player even has the perk
-            RicochetPerkComponent ricochetPerk = rpc.get(playerEntity);
-            if (ricochetPerk == null) return; // Player doesn't have the perk. Do nothing.
+    @Override
+    protected void processEntity(Entity eventEntity, float deltaTime) {
+        // 1. Check if the player even has the perk
+        RicochetPerkComponent ricochetPerk = rpc.get(playerEntity);
+        if (ricochetPerk == null) return; // Player doesn't have the perk. Do nothing.
 
-            // 2. The Jackpot Roll (Pure mathematical randomness)
-            if (MathUtils.random() <= ricochetPerk.chance) {
+        // 2. The Jackpot Roll (Pure mathematical randomness)
+        if (MathUtils.random() <= ricochetPerk.chance) {
 
-                HitEventComponent hit = hm.get(bulletEntity);
-                TransformComponent bulletTx = tm.get(bulletEntity);
-                VelocityComponent bulletVel = vm.get(bulletEntity);
+            HitEventComponent hitEvent = hm.get(eventEntity);
+            TransformComponent bulletTx = tm.get(hitEvent.bullet);
+            VelocityComponent bulletVel = vm.get(hitEvent.bullet);
 
-                // 3. Find the nearest enemy, ignoring the one we just hit
-                Entity newTarget = findAnyEnemyInRange(bulletTx.x, bulletTx.y, hit.targetEntity);
+            // 3. Find the nearest enemy, ignoring the one we just hitEvent
+            Entity newTarget = findAnyEnemyInRange(bulletTx.x, bulletTx.y, hitEvent.targetEntity);
 
-                if (newTarget != null) {
-                    TransformComponent targetTx = tm.get(newTarget);
-                    // 4. Calculate current speed (Pythagorean theorem)
-                    // We only do this math IF a ricochet actually happens, saving CPU cycles.
+            if (newTarget != null) {
+                TransformComponent targetTx = tm.get(newTarget);
+                // 4. Calculate current speed (Pythagorean theorem)
+                // We only do this math IF a ricochet actually happens, saving CPU cycles.
 
-                    // 5. Get direction vector to new target and normalize it
-                    TEMP_VECTOR.set(targetTx.x - bulletTx.x, targetTx.y - bulletTx.y).nor();
-                    bulletTx.rotation = TEMP_VECTOR.angleDeg();
+                // 5. Get direction vector to new target and normalize it
+                TEMP_VECTOR.set(targetTx.x - bulletTx.x, targetTx.y - bulletTx.y).nor();
+                bulletTx.rotation = TEMP_VECTOR.angleDeg();
 
-                    ShapeComponent shapeComponent = sm.get(bulletEntity);
-                    shapeComponent.color = Color.BLUE;
+                ShapeComponent bulletShapeComponent = sm.get(hitEvent.bullet);
+                bulletShapeComponent.color = Color.BLUE;
 
-                    BulletComponent bulletData = bulletEntity.getComponent(BulletComponent.class);
-                    bulletData.distanceTravelled = 0;
-                    bulletData.startX = targetTx.x;
-                    bulletData.startY = targetTx.y;
-                    // 6. Apply the speed to the new normalized direction
-                    bulletVel.x = TEMP_VECTOR.x * bulletVel.speed;
-                    bulletVel.y = TEMP_VECTOR.y * bulletVel.speed;
+                BulletComponent bulletData = hitEvent.bullet.getComponent(BulletComponent.class);
+                bulletData.distanceTravelled = 0;
+                bulletData.startX = targetTx.x;
+                bulletData.startY = targetTx.y;
+                // 6. Apply the speed to the new normalized direction
+                bulletVel.x = TEMP_VECTOR.x * bulletVel.speed;
+                bulletVel.y = TEMP_VECTOR.y * bulletVel.speed;
 
-                    // 7. Grant the Pardon!
-                    // This tells the BulletLifecycleSystem (which runs later) NOT to kill this bullet.
-                    bulletEntity.add(getEngine().createComponent(PardonedComponent.class));
-                }
+                // 7. Grant the Pardon!
+                // This tells the BulletLifecycleSystem (which runs later) NOT to kill this bullet.
+                hitEvent.bullet.add(getEngine().createComponent(PardonedComponent.class));
+            }
+        }
+    }
+
+    /**
+     * Finds the nearest enemy, excluding the one we just hit.
+     * Uses dst2 (distance squared) to avoid expensive Math.sqrt() calls during the loop.
+     */
+    /**
+     * Highly optimized search.
+     * Returns the FIRST enemy found within range, drastically reducing CPU cycles.
+     */
+    private Entity findAnyEnemyInRange(float startX, float startY, Entity excludeEntity) {
+
+        for (int i = 0; i < enemies.size(); ++i) {
+            Entity enemy = enemies.get(i);
+
+            if (enemy == excludeEntity) continue;
+
+            TransformComponent enemyTx = tm.get(enemy);
+
+            float dx = enemyTx.x - startX;
+            float dy = enemyTx.y - startY;
+            float distSq = (dx * dx) + (dy * dy);
+
+            // THE OPTIMIZATION: First one inside the radius wins!
+            if (distSq <= MAX_BOUNCE_RANGE_SQ) {
+                return enemy; // Instantly exit the loop!
             }
         }
 
-        /**
-         * Finds the nearest enemy, excluding the one we just hit.
-         * Uses dst2 (distance squared) to avoid expensive Math.sqrt() calls during the loop.
-         */
-        /**
-         * Highly optimized search.
-         * Returns the FIRST enemy found within range, drastically reducing CPU cycles.
-         */
-        private Entity findAnyEnemyInRange(float startX, float startY, Entity excludeEntity) {
-
-            for (int i = 0; i < enemies.size(); ++i) {
-                Entity enemy = enemies.get(i);
-
-                if (enemy == excludeEntity) continue;
-
-                TransformComponent enemyTx = tm.get(enemy);
-
-                float dx = enemyTx.x - startX;
-                float dy = enemyTx.y - startY;
-                float distSq = (dx * dx) + (dy * dy);
-
-                // THE OPTIMIZATION: First one inside the radius wins!
-                if (distSq <= MAX_BOUNCE_RANGE_SQ) {
-                    return enemy; // Instantly exit the loop!
-                }
-            }
-
-            return null; // No enemies within bounce range
-        }
+        return null; // No enemies within bounce range
     }
+}

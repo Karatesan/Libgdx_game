@@ -13,18 +13,20 @@ import com.karatesan.game.ecs.systems.core.PausableSystem;
 
 public class BulletLifecycleSystem extends IteratingSystem implements PausableSystem {
     private final ComponentMapper<PardonedComponent> pm = ComponentMapper.getFor(PardonedComponent.class);
+    private final ComponentMapper<HitEventComponent> em = ComponentMapper.getFor(HitEventComponent.class);
 
     public BulletLifecycleSystem() {
-        super(Family.all(BulletComponent.class, HitEventComponent.class).get());
+        super(Family.all(HitEventComponent.class).get());
     }
 
     @Override
-    protected void processEntity(Entity entity, float deltaTime) {
-        entity.remove(HitEventComponent.class);
-        if (pm.has(entity)) {
-            entity.remove(PardonedComponent.class);
+    protected void processEntity(Entity eventEntity, float deltaTime) {
+        HitEventComponent hitEventComponent = em.get(eventEntity);
+        if (pm.has(hitEventComponent.bullet)) {
+            hitEventComponent.bullet.remove(PardonedComponent.class);
         } else {
-            entity.add(getEngine().createComponent(DeadComponent.class));
+            hitEventComponent.bullet.add(getEngine().createComponent(DeadComponent.class));
         }
+        getEngine().removeEntity(eventEntity);
     }
 }

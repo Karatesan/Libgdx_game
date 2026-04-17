@@ -81,6 +81,7 @@ public class EntityFactory {
         player.add(hitbox);
         player.add(inventory);
         player.add(engine.createComponent(MagnetComponent.class));
+        player.add(engine.createComponent(RicochetPerkComponent.class));
         equipBasicWeapon(player);
 
         // Add the finished Entity to the Engine
@@ -181,7 +182,7 @@ public class EntityFactory {
         WeaponComponent weapon = engine.createComponent(WeaponComponent.class);
         weapon.minDamage = 3f;
         weapon.maxDamage = 5f;
-        weapon.fireRate = 0.8f; // Super fast!
+        weapon.fireRate = 0.8f;
         weapon.projectileCount = 1;
         weapon.spreadAngle = 10f; // Slight inaccuracy
         weapon.projectileSpeed = 1000f;
@@ -223,12 +224,15 @@ public class EntityFactory {
         HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
         hitbox.radius = 4;
 
+        PierceComponent pierceComponent = engine.createComponent(PierceComponent.class);
+
         bullet.add(transform);
         bullet.add(velocity);
         bullet.add(shape);
         bullet.add(bulletData);
         bullet.add(payload);
         bullet.add(hitbox);
+        bullet.add(pierceComponent);
 
         engine.addEntity(bullet);
     }

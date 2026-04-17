@@ -80,10 +80,13 @@ public class CollisionSystem extends EntitySystem implements PausableSystem {
                     HealthComponent eHealth = healthM.get(enemy);
                     eHealth.currentHp -= payload.damage;
 
+                    Entity event = engine.createEntity();
                     // 2. Mark Bullet as Hit
                     HitEventComponent hitEvent = engine.createComponent(HitEventComponent.class);
                     hitEvent.targetEntity = enemy;
-                    bullet.add(hitEvent);
+                    hitEvent.bullet = bullet;
+                    event.add(hitEvent);
+                    engine.addEntity(event);
 
                     //Create floating text
                     entityFactory.createDamageText(enemy, payload.damage, payload.isCrit);
