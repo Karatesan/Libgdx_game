@@ -61,7 +61,6 @@ public class HudRenderer {
         font.draw(batch, UIText, (screenW / 2f) - 60f, (screenH / 2f) + 50f);
 
         font.setColor(Color.WHITE);
-        font.getData().setScale(1f);
     }
 
     public void drawTimer(float timeSurvived, float screenW, float screenH) {

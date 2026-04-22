@@ -20,12 +20,17 @@ import com.karatesan.game.perks.PerkRegistry;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public class LevelUpUIBuilder {
+    private final Label.LabelStyle styleWhite;
+    private final Label.LabelStyle styleGray;
+    private final Label.LabelStyle styleCyan;
+    private final Label.LabelStyle styleGreen;
+    private final Label.LabelStyle styleYellow;
 
-    private final BitmapFont font;
     private final ShapeDrawer shapeDrawer;
 
     private final Stage stage;
     private final PerkRegistry perkRegistry;
+    PerkSelectionListener callback;
 
     private final Drawable cardBg;
     private final Drawable cardHoverBg;
@@ -33,21 +38,26 @@ public class LevelUpUIBuilder {
     private static final float CARD_WIDTH = 220f;
     private static final float CARD_PAD = 12f;
 
-    public LevelUpUIBuilder(BitmapFont font, ShapeDrawer shapeDrawer, Stage stage, PerkRegistry perkRegistry) {
-        this.font = font;
+    public LevelUpUIBuilder(BitmapFont font, ShapeDrawer shapeDrawer, Stage stage, PerkRegistry perkRegistry,
+                            PerkSelectionListener callback) {
         this.shapeDrawer = shapeDrawer;
         this.stage = stage;
+        this.callback = callback;
         this.perkRegistry = perkRegistry;
 
         TextureRegionDrawable base = new TextureRegionDrawable(shapeDrawer.getRegion());
         cardBg = base.tint(new Color(0.15f, 0.15f, 0.2f, 0.95f));
         cardHoverBg = base.tint(new Color(0.25f, 0.25f, 0.35f, 0.95f));
+
+        styleWhite = new Label.LabelStyle(font, Color.WHITE);
+        styleGray = new Label.LabelStyle(font, Color.LIGHT_GRAY);
+        styleCyan = new Label.LabelStyle(font, Color.CYAN);
+        styleGreen = new Label.LabelStyle(font, Color.GREEN);
+        styleYellow = new Label.LabelStyle(font, Color.YELLOW);
     }
 
 
-    public boolean buildPerkUI(float luck, PerkInventoryComponent inventory, PerkSelectionListener callback) {
-        stage.clear();
-
+    public boolean buildPerkUI(float luck, PerkInventoryComponent inventory) {
         Array<PerkOffer> offers = perkRegistry.generateOffers(inventory, 3, luck);
 
         // Edge case: all perks maxed
@@ -60,20 +70,20 @@ public class LevelUpUIBuilder {
         root.center();
 
         // Title
-        Label title = new Label("CHOOSE A PERK", new Label.LabelStyle(font, Color.YELLOW));
+        Label title = new Label("CHOOSE A PERK", styleYellow);
         root.add(title).colspan(offers.size).padBottom(30f);
         root.row();
 
         // Cards
         for (int i = 0; i < offers.size; i++) {
-            root.add(buildCard(offers.get(i), callback)).width(CARD_WIDTH).pad(10f);
+            root.add(buildCard(offers.get(i))).width(CARD_WIDTH).pad(10f);
         }
 
         stage.addActor(root);
         return true;
     }
 
-    private Table buildCard(final PerkOffer offer, PerkSelectionListener callback) {
+    private Table buildCard(final PerkOffer offer) {
         final Table card = new Table();
         card.setBackground(cardBg);
         card.pad(CARD_PAD);
@@ -81,13 +91,13 @@ public class LevelUpUIBuilder {
         card.setTouchable(Touchable.enabled);
 
         // --- Perk Name ---
-        Label name = new Label(offer.definition.name, new Label.LabelStyle(font, Color.WHITE));
+        Label name = new Label(offer.definition.name, styleWhite);
         name.setAlignment(Align.center);
         card.add(name).padBottom(8f);
         card.row();
 
         // --- Flavor Description ---
-        Label desc = new Label(offer.definition.description, new Label.LabelStyle(font, Color.LIGHT_GRAY));
+        Label desc = new Label(offer.definition.description, styleGray);
         desc.setWrap(true);
         desc.setAlignment(Align.center);
         card.add(desc).padBottom(12f);
@@ -95,7 +105,7 @@ public class LevelUpUIBuilder {
 
         // --- Level Indicator ---
         String levelText = "Level " + offer.nextLevel + " / " + offer.definition.maxLevel;
-        Label level = new Label(levelText, new Label.LabelStyle(font, Color.CYAN));
+        Label level = new Label(levelText, styleCyan);
         level.setAlignment(Align.center);
         card.add(level).padBottom(8f);
         card.row();
@@ -107,7 +117,7 @@ public class LevelUpUIBuilder {
         card.row();
 
         // --- What This Level Does ---
-        Label effect = new Label(offer.levelData.levelUpDescription, new Label.LabelStyle(font, Color.GREEN));
+        Label effect = new Label(offer.levelData.levelUpDescription, styleGreen);
         effect.setWrap(true);
         effect.setAlignment(Align.center);
         card.add(effect).expandY().top();
@@ -129,9 +139,6 @@ public class LevelUpUIBuilder {
                 callback.perkSelectionCallback(offer);
             }
         });
-
         return card;
     }
-
-
 }

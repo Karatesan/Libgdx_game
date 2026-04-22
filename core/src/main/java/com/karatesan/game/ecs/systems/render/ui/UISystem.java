@@ -43,8 +43,9 @@ public class UISystem extends EntitySystem {
                     PerkRegistry perkRegistry) {
         perkSelectionCallback = this::onPerkSelected;
         this.hudRenderer = new HudRenderer(batch, font, shapeDrawer);
-        this.levelUpController = new LevelUpController(new LevelUpUIBuilder(font, shapeDrawer, stage, perkRegistry),
-            stage, perkSelectionCallback);
+        this.levelUpController = new LevelUpController(
+            new LevelUpUIBuilder(font, shapeDrawer, stage, perkRegistry, perkSelectionCallback), stage,
+            perkSelectionCallback);
         this.batch = batch;
         this.viewport = viewport;
         this.font = font;
@@ -101,14 +102,14 @@ public class UISystem extends EntitySystem {
         PerkInventoryComponent inventory = perkMapper.get(player);
         StatsComponent statsComponent = statsMapper.get(player);
 
-        if (session.currentState == State.LEVEL_UP) {
+        boolean isLevelUp = session.currentState == State.LEVEL_UP;
+        if (isLevelUp) {
             hudRenderer.dimBackground(screenW, screenH);
-            float savedScale = font.getData().scaleX;
             font.getData().setScale(PERK_FONT_SCALE);
-            levelUpController.update(session.currentState, inventory, statsComponent.luck, deltaTime);
-            font.getData().setScale(savedScale);
-        } else {
-            levelUpController.update(session.currentState, inventory, statsComponent.luck, deltaTime);
+        }
+        levelUpController.update(session.currentState, inventory, statsComponent.luck, deltaTime);
+        if (isLevelUp) {
+            font.getData().setScale(1f);
         }
     }
 

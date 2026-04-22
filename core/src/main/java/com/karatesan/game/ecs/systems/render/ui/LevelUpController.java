@@ -20,7 +20,7 @@ public class LevelUpController {
     public void update(State currentState, PerkInventoryComponent inventory, float playerLuckStat, float deltaTime) {
         if (currentState == State.LEVEL_UP) {
             if (!perkUIBuilt) {
-                perkUIBuilt = uiBuilder.buildPerkUI(playerLuckStat, inventory, perkCallback);
+                perkUIBuilt = uiBuilder.buildPerkUI(playerLuckStat, inventory);
             }
             stage.act(deltaTime);
             stage.draw();
@@ -32,6 +32,7 @@ public class LevelUpController {
 
     public void reset() {
         stage.clear();
+        perkUIBuilt = false;
     }
 
     public boolean isActive() {
