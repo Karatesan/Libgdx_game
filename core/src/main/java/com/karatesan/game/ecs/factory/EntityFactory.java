@@ -69,7 +69,6 @@ public class EntityFactory {
         hitbox.radius = 16f; // Half of size 32
 
         BulletDataComponent bulletData = engine.createComponent(BulletDataComponent.class);
-        bulletData.ricochetChance = 1f;
         // Glue the components to the Entity
         player.add(transform);
         player.add(velocity);
@@ -148,8 +147,8 @@ public class EntityFactory {
     public void equipBasicWeapon(Entity player) {
         player.remove(WeaponComponent.class);
         WeaponComponent weapon = engine.createComponent(WeaponComponent.class);
-        weapon.minDamage = 3f;
-        weapon.maxDamage = 5f;
+        weapon.minDamage = 100f;
+        weapon.maxDamage = 150f;
         weapon.fireRate = 0.8f;
         weapon.projectileCount = 1;
         weapon.spreadAngle = 10f; // Slight inaccuracy
@@ -194,6 +193,7 @@ public class EntityFactory {
         //STAMP PERKS -------------------------------------------------------
         bulletTag.pierceCount = bulletData.pierceCount;
         bulletTag.ricochetChance = bulletData.ricochetChance;
+        bulletTag.ricochetCount = bulletData.ricochetCount;
 
         DamagePayloadComponent payload = engine.createComponent(DamagePayloadComponent.class);
         payload.damage = damage;

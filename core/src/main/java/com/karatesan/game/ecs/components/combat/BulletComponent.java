@@ -16,6 +16,7 @@ public class BulletComponent implements Component, Poolable {
     public float ricochetChance = 0f;
     public Entity lastHit;
     public int pierceCount;
+    public int ricochetCount;
 
     @Override
     public void reset() {

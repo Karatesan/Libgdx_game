@@ -123,11 +123,15 @@ public class PerkApplicationSystem extends IteratingSystem {
 
         switch (effect.target) {
             case "RICOCHET_CHANCE": {
-                bulletData.ricochetChance = effect.value;
+                bulletData.ricochetChance += effect.value;
+                break;
+            }
+            case "RICOCHET_COUNT": {
+                bulletData.ricochetCount += (int) effect.value;
                 break;
             }
             case "PIERCE":
-                bulletData.pierceCount = (int) effect.value;
+                bulletData.pierceCount += (int) effect.value;
                 break;
 
 

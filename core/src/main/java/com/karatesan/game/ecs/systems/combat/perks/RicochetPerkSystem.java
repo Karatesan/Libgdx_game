@@ -33,10 +33,8 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
     private final ComponentMapper<DamagePayloadComponent> dm = ComponentMapper.getFor(DamagePayloadComponent.class);
 
 
-
     // Cached references (Zero-GC lookups)
     private ImmutableArray<Entity> enemies;
-    private ImmutableArray<Entity> playerEntity;
 
     // Static vector to prevent GC allocation during math operations
     private static final Vector2 TEMP_VECTOR = new Vector2();
@@ -52,10 +50,6 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
     public void addedToEngine(Engine engine) {
         super.addedToEngine(engine);
 
-        // 1. Cache the Player Entity (Assuming single-player, there is only one)
-        // We do this here so we don't have to search for the player every time a bullet hits.
-        playerEntity = engine.getEntitiesFor(Family.all(PlayerComponent.class).get());
-
         // 2. Cache the Live Array of Enemies
         // Ashley automatically keeps this array updated. We just hold the reference.
         // We exclude DeadComponent so bullets don't bounce toward corpses.
@@ -65,15 +59,12 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
 
     @Override
     protected void processEntity(Entity eventEntity, float deltaTime) {
-        // 1. Check if the player even has the perk
-        Entity player = playerEntity.first();
-        BulletDataComponent bulletStamp = bm.get(player);
-
-        if (bulletStamp.ricochetChance == 0) return;
+        HitEventComponent hitEvent = hm.get(eventEntity);
+        BulletComponent bulletData = hitEvent.bullet.getComponent(BulletComponent.class);
+        if (bulletData.ricochetChance == 0 || bulletData.ricochetCount == 0) return;
         // 2. The Jackpot Roll (Pure mathematical randomness)
-        if (MathUtils.random() <= bulletStamp.ricochetChance) {
-
-            HitEventComponent hitEvent = hm.get(eventEntity);
+        if (MathUtils.random() <= bulletData.ricochetChance) {
+            bulletData.ricochetCount--;
             TransformComponent bulletTx = tm.get(hitEvent.bullet);
             VelocityComponent bulletVel = vm.get(hitEvent.bullet);
 
@@ -92,7 +83,6 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
                 ShapeComponent bulletShapeComponent = sm.get(hitEvent.bullet);
                 bulletShapeComponent.color = Color.BLUE;
 
-                BulletComponent bulletData = hitEvent.bullet.getComponent(BulletComponent.class);
                 bulletData.distanceTravelled = 0;
                 bulletData.startX = bulletTx.x;
                 bulletData.startY = bulletTx.y;

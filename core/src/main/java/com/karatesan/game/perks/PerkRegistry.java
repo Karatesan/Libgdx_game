@@ -10,6 +10,8 @@ import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
 
 public class PerkRegistry {
     private final ObjectMap<String, PerkDefinition> perks = new ObjectMap<>();
+    //TODO remove once all perks are working
+    private final Array<String> included = new Array<>(new String[]{"bouncing_chaos"});
 
     public PerkRegistry(FileHandle file) {
         Json json = new Json();
@@ -17,7 +19,7 @@ public class PerkRegistry {
 
         PerkDefinition[] definitions = json.fromJson(PerkDefinition[].class, file);
         for (PerkDefinition def : definitions) {
-            perks.put(def.id, def);
+            if (included.contains(def.id, false)) perks.put(def.id, def);
         }
     }
 

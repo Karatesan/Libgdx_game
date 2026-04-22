@@ -312,7 +312,7 @@
         "level": 1,
         "levelUpDescription": "12% Ricochet Chance. 1 max bounce.",
         "effects": [
-          { "type": "TRAIT_ADDITION", "target": "RICOCHET_CHANCE", "value": 0.12 },
+          { "type": "TRAIT_ADDITION", "target": "RICOCHET_CHANCE", "value": 1 },
           { "type": "TRAIT_ADDITION", "target": "RICOCHET_COUNT", "value": 1 }
         ]
       },
