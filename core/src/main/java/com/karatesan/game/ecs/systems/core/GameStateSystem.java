@@ -14,13 +14,6 @@ import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.tag.DeadComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
-import com.karatesan.game.ecs.systems.combat.BulletSystem;
-import com.karatesan.game.ecs.systems.combat.CollisionSystem;
-import com.karatesan.game.ecs.systems.combat.WeaponSystem;
-import com.karatesan.game.ecs.systems.movement.EnemySystem;
-import com.karatesan.game.ecs.systems.movement.MovementSystem;
-import com.karatesan.game.ecs.systems.movement.PlayerInputSystem;
-import com.karatesan.game.ecs.systems.waveSystem.WaveSpawnerSystem;
 import com.karatesan.game.ecs.utility.State;
 
 public class GameStateSystem extends EntitySystem {

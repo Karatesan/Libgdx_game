@@ -5,13 +5,11 @@ import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
-import com.karatesan.game.ecs.components.perks.RicochetPerkComponent;
 import com.karatesan.game.ecs.components.render.FloatingTextComponent;
 import com.karatesan.game.ecs.components.combat.*;
 import com.karatesan.game.ecs.components.core.LifeTimeComponent;
 import com.karatesan.game.ecs.components.core.SessionComponent;
 import com.karatesan.game.ecs.components.economy.CollectibleComponent;
-import com.karatesan.game.ecs.components.economy.MagnetComponent;
 import com.karatesan.game.ecs.components.economy.PullableComponent;
 import com.karatesan.game.ecs.components.economy.XpComponent;
 import com.karatesan.game.ecs.components.physics.HitboxComponent;
@@ -70,6 +68,8 @@ public class EntityFactory {
 
         hitbox.radius = 16f; // Half of size 32
 
+        BulletDataComponent bulletData = engine.createComponent(BulletDataComponent.class);
+        bulletData.ricochetChance = 1f;
         // Glue the components to the Entity
         player.add(transform);
         player.add(velocity);
@@ -80,8 +80,7 @@ public class EntityFactory {
         player.add(health);
         player.add(hitbox);
         player.add(inventory);
-        player.add(engine.createComponent(MagnetComponent.class));
-        player.add(engine.createComponent(RicochetPerkComponent.class));
+        player.add(bulletData);
         equipBasicWeapon(player);
 
         // Add the finished Entity to the Engine
@@ -146,37 +145,6 @@ public class EntityFactory {
 
 
     // --- WEAPON CONFIGURATORS ---
-
-    public void equipShotgun(Entity player) {
-        player.remove(WeaponComponent.class);
-        WeaponComponent weapon = engine.createComponent(WeaponComponent.class);
-        //CooldownComponent cooldown = engine.createComponent(CooldownComponent.class);
-        //cooldown.cooldown = 0.8f;
-        weapon.minDamage = 8f;
-        weapon.maxDamage = 12f;
-        weapon.fireRate = 0.8f;
-        weapon.projectileCount = 6;
-        weapon.spreadAngle = 35f;
-        weapon.projectileSpeed = 500f;
-        weapon.range = 2000f;
-
-        player.add(weapon);
-    }
-
-    public void equipMachineGun(Entity player) {
-        player.remove(WeaponComponent.class);
-        WeaponComponent weapon = engine.createComponent(WeaponComponent.class);
-        weapon.minDamage = 6f;
-        weapon.maxDamage = 9f;
-        weapon.fireRate = 0.3f; // Super fast!
-        weapon.projectileCount = 1;
-        weapon.spreadAngle = 8f; // Slight inaccuracy
-        weapon.projectileSpeed = 1800f;
-        weapon.range = 1000f;
-
-        player.add(weapon);
-    }
-
     public void equipBasicWeapon(Entity player) {
         player.remove(WeaponComponent.class);
         WeaponComponent weapon = engine.createComponent(WeaponComponent.class);
@@ -190,8 +158,72 @@ public class EntityFactory {
 
         player.add(weapon);
     }
+
     // --- BULLET SPAWNER ---
     // Your WeaponSystem will call this method!
+    public void createBullet(TransformComponent playerTransform, WeaponComponent weapon, BulletDataComponent bulletData,
+                             StatsComponent stats, float angle) {
+        Entity bullet = engine.createEntity();
+
+        boolean isCrit = MathUtils.random() <= stats.critChance;
+        float damage = calculateDamage(weapon.minDamage, weapon.maxDamage, stats, isCrit);
+
+        TransformComponent transform = engine.createComponent(TransformComponent.class);
+        transform.x = playerTransform.x;
+        transform.y = playerTransform.y;
+        transform.z = 2;
+        transform.size = 4; //TODO hardcoded bullet size
+        transform.rotation = angle;
+
+        float angleRad = angle * MathUtils.degreesToRadians;
+
+        VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
+        velocity.x = MathUtils.cos(angleRad) * weapon.projectileSpeed;
+        velocity.y = MathUtils.sin(angleRad) * weapon.projectileSpeed;
+        velocity.speed = weapon.projectileSpeed;
+
+        ShapeComponent shape = engine.createComponent(ShapeComponent.class);
+        shape.color = isCrit ? Color.RED : Color.LIGHT_GRAY; // Make crits look cool!
+
+        BulletComponent bulletTag = engine.createComponent(BulletComponent.class);
+        bulletTag.range = weapon.range;
+        // ADD THESE: Anchor the trail to the spawn position
+        bulletTag.startX = playerTransform.x;
+        bulletTag.startY = playerTransform.y;
+
+        //STAMP PERKS -------------------------------------------------------
+        bulletTag.pierceCount = bulletData.pierceCount;
+        bulletTag.ricochetChance = bulletData.ricochetChance;
+
+        DamagePayloadComponent payload = engine.createComponent(DamagePayloadComponent.class);
+        payload.damage = damage;
+        payload.isCrit = isCrit;
+
+        HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
+        hitbox.radius = 4;
+
+        PierceComponent pierceComponent = engine.createComponent(PierceComponent.class);
+
+        bullet.add(transform);
+        bullet.add(velocity);
+        bullet.add(shape);
+        bullet.add(bulletTag);
+        bullet.add(payload);
+        bullet.add(hitbox);
+        bullet.add(pierceComponent);
+
+        engine.addEntity(bullet);
+    }
+
+    private float calculateDamage(float minDamage, float maxDamage, StatsComponent stats, boolean isCrit) {
+        float damage = MathUtils.random(minDamage, maxDamage);
+        damage *= stats.damageMultiplier;
+        if (isCrit) {
+            damage *= stats.critMultiplier;
+        }
+        return damage;
+    }
+
 
     public void createBullet(float x, float y, float angleRad, float speed, float damage, float range, boolean isCrit) {
         Entity bullet = engine.createEntity();

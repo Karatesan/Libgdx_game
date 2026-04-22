@@ -18,7 +18,6 @@ public class LifeTimeSystem extends IteratingSystem implements PausableSystem{
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         LifeTimeComponent lifeTimeComponent = lm.get(entity);
-
         lifeTimeComponent.timer -= deltaTime;
 
         if (lifeTimeComponent.timer <= 0) {

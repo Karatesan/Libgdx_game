@@ -10,9 +10,10 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.karatesan.game.ecs.components.combat.BulletComponent;
+import com.karatesan.game.ecs.components.combat.BulletDataComponent;
+import com.karatesan.game.ecs.components.combat.DamagePayloadComponent;
 import com.karatesan.game.ecs.components.event.HitEventComponent;
 import com.karatesan.game.ecs.components.event.PardonedComponent;
-import com.karatesan.game.ecs.components.perks.RicochetPerkComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
 import com.karatesan.game.ecs.components.render.ShapeComponent;
@@ -28,13 +29,14 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
     private final ComponentMapper<ShapeComponent> sm = ComponentMapper.getFor(ShapeComponent.class);
+    private final ComponentMapper<BulletDataComponent> bm = ComponentMapper.getFor(BulletDataComponent.class);
+    private final ComponentMapper<DamagePayloadComponent> dm = ComponentMapper.getFor(DamagePayloadComponent.class);
 
-    // Mapper for the Player Perk
-    private final ComponentMapper<RicochetPerkComponent> rpc = ComponentMapper.getFor(RicochetPerkComponent.class);
+
 
     // Cached references (Zero-GC lookups)
     private ImmutableArray<Entity> enemies;
-    private Entity playerEntity;
+    private ImmutableArray<Entity> playerEntity;
 
     // Static vector to prevent GC allocation during math operations
     private static final Vector2 TEMP_VECTOR = new Vector2();
@@ -52,7 +54,7 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
 
         // 1. Cache the Player Entity (Assuming single-player, there is only one)
         // We do this here so we don't have to search for the player every time a bullet hits.
-        playerEntity = engine.getEntitiesFor(Family.all(PlayerComponent.class).get()).first();
+        playerEntity = engine.getEntitiesFor(Family.all(PlayerComponent.class).get());
 
         // 2. Cache the Live Array of Enemies
         // Ashley automatically keeps this array updated. We just hold the reference.
@@ -64,11 +66,12 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
     @Override
     protected void processEntity(Entity eventEntity, float deltaTime) {
         // 1. Check if the player even has the perk
-        RicochetPerkComponent ricochetPerk = rpc.get(playerEntity);
-        if (ricochetPerk == null) return; // Player doesn't have the perk. Do nothing.
+        Entity player = playerEntity.first();
+        BulletDataComponent bulletStamp = bm.get(player);
 
+        if (bulletStamp.ricochetChance == 0) return;
         // 2. The Jackpot Roll (Pure mathematical randomness)
-        if (MathUtils.random() <= ricochetPerk.chance) {
+        if (MathUtils.random() <= bulletStamp.ricochetChance) {
 
             HitEventComponent hitEvent = hm.get(eventEntity);
             TransformComponent bulletTx = tm.get(hitEvent.bullet);
@@ -91,11 +94,13 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
 
                 BulletComponent bulletData = hitEvent.bullet.getComponent(BulletComponent.class);
                 bulletData.distanceTravelled = 0;
-                bulletData.startX = targetTx.x;
-                bulletData.startY = targetTx.y;
+                bulletData.startX = bulletTx.x;
+                bulletData.startY = bulletTx.y;
                 // 6. Apply the speed to the new normalized direction
                 bulletVel.x = TEMP_VECTOR.x * bulletVel.speed;
                 bulletVel.y = TEMP_VECTOR.y * bulletVel.speed;
+                DamagePayloadComponent payload = dm.get(hitEvent.bullet);
+                //payload.reset();
 
                 // 7. Grant the Pardon!
                 // This tells the BulletLifecycleSystem (which runs later) NOT to kill this bullet.

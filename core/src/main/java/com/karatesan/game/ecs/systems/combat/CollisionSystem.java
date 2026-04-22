@@ -13,6 +13,7 @@ import com.karatesan.game.ecs.components.physics.HitboxComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.tag.DeadComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
+import com.karatesan.game.ecs.components.tag.PlayerComponent;
 import com.karatesan.game.ecs.factory.EntityFactory;
 import com.karatesan.game.ecs.systems.core.PausableSystem;
 import com.karatesan.game.ecs.utility.ECSUtils;
@@ -25,40 +26,35 @@ public class CollisionSystem extends EntitySystem implements PausableSystem {
     private final ComponentMapper<DamagePayloadComponent> dmgM = ComponentMapper.getFor(DamagePayloadComponent.class);
     private final ComponentMapper<DeadComponent> deadM = ComponentMapper.getFor(DeadComponent.class);
     private final ComponentMapper<InvincibilityComponent> im = ComponentMapper.getFor(InvincibilityComponent.class);
-    private final ComponentMapper<HitEventComponent> hem = ComponentMapper.getFor(HitEventComponent.class);
     // We define the two groups we want to compare
     private final Family bulletFamily = Family.all(BulletComponent.class, TransformComponent.class,
         HitboxComponent.class, DamagePayloadComponent.class).get();
     private final Family enemyFamily = Family.all(EnemyComponent.class, TransformComponent.class, HitboxComponent.class,
         HealthComponent.class).get();
 
-    private Entity playerEntity;
-    private EntityFactory entityFactory;
+    private ImmutableArray<Entity> playerEntities;
 
-    public CollisionSystem(EntityFactory entityFactory) {
-        this.entityFactory = entityFactory;
+    private ImmutableArray<Entity> bullets;
+    private ImmutableArray<Entity> enemies;
+
+    @Override
+    public void addedToEngine(Engine engine) {
+        super.addedToEngine(engine);
+        bullets = engine.getEntitiesFor(bulletFamily);
+        enemies = engine.getEntitiesFor(enemyFamily);
+        playerEntities = engine.getEntitiesFor(Family.all(PlayerComponent.class).get());
     }
 
     @Override
     public void update(float deltaTime) {
-        PooledEngine engine = (PooledEngine) getEngine();
-
-        ImmutableArray<Entity> bullets = engine.getEntitiesFor(bulletFamily);
-        ImmutableArray<Entity> enemies = engine.getEntitiesFor(enemyFamily);
-
-        playerEntity = ECSUtils.getPlayer(getEngine());
-        checkPlayerEnemyCollisions(enemies);
-        checkBulletEnemyCollisions(bullets, enemies, engine);
+        checkPlayerEnemyCollisions();
+        checkBulletEnemyCollisions();
     }
 
-    private void checkBulletEnemyCollisions(ImmutableArray<Entity> bullets, ImmutableArray<Entity> enemies,
-                                            PooledEngine engine) {
+    private void checkBulletEnemyCollisions() {
         // Double loop: Check every bullet against every enemy
         for (int i = 0; i < bullets.size(); ++i) {
             Entity bullet = bullets.get(i);
-
-            // If bullet already hit (hit something this frame), skip it
-            if (hem.has(bullet)) continue;
 
             TransformComponent bPos = tm.get(bullet);
             HitboxComponent bBox = hm.get(bullet);
@@ -72,29 +68,18 @@ public class CollisionSystem extends EntitySystem implements PausableSystem {
 
                 TransformComponent ePos = tm.get(enemy);
                 HitboxComponent eBox = hm.get(enemy);
-
                 // If they hit!
                 if (checkCollision(bPos, ePos, bBox.radius, eBox.radius)) {
-
-                    // 1. Deal Damage
-                    HealthComponent eHealth = healthM.get(enemy);
-                    eHealth.currentHp -= payload.damage;
-
-                    Entity event = engine.createEntity();
+                    Entity event = getEngine().createEntity();
                     // 2. Mark Bullet as Hit
-                    HitEventComponent hitEvent = engine.createComponent(HitEventComponent.class);
+                    HitEventComponent hitEvent = getEngine().createComponent(HitEventComponent.class);
                     hitEvent.targetEntity = enemy;
                     hitEvent.bullet = bullet;
+                    hitEvent.damage = payload.damage;
+                    hitEvent.isCrit = payload.isCrit;
                     event.add(hitEvent);
-                    engine.addEntity(event);
+                    getEngine().addEntity(event);
 
-                    //Create floating text
-                    entityFactory.createDamageText(enemy, payload.damage, payload.isCrit);
-
-                    // 3. Check if Enemy died
-                    if (eHealth.currentHp <= 0) {
-                        enemy.add(engine.createComponent(DeathEventComponent.class));
-                    }
                     // Break out of the enemy loop (this bullet can't hit a second enemy)
                     break;
                 }
@@ -102,28 +87,32 @@ public class CollisionSystem extends EntitySystem implements PausableSystem {
         }
     }
 
-    private void checkPlayerEnemyCollisions(ImmutableArray<Entity> enemies) {
-        if (playerEntity != null) {
-            TransformComponent pPos = tm.get(playerEntity);
-            HitboxComponent pBox = hm.get(playerEntity);
-            HealthComponent pH = healthM.get(playerEntity);
+    private void checkPlayerEnemyCollisions() {
+        if (playerEntities.size() == 0) return;
+        Entity playerEntity = playerEntities.first();
+        if (im.has(playerEntity)) return; // exit entirely, no loop needed
 
-            for (Entity enemy : enemies) {
-                if (deadM.has(enemy) || im.has(playerEntity)) continue;
-                TransformComponent ePos = tm.get(enemy);
-                HitboxComponent eBox = hm.get(enemy);
-                if (checkCollision(pPos, ePos, pBox.radius, eBox.radius)) {
-                    pH.currentHp -= 10f;
-                    if (pH.currentHp <= 0) {
-                        playerEntity.add(getEngine().createComponent(FatalDamageComponent.class));
-                    } else {
-                        playerEntity.add(getEngine().createComponent(InvincibilityComponent.class));
-                    }
-                    break;
+        TransformComponent pPos = tm.get(playerEntity);
+        HitboxComponent pBox = hm.get(playerEntity);
+        HealthComponent pH = healthM.get(playerEntity);
+
+        for (int i = 0; i < enemies.size(); i++) {
+            Entity enemy = enemies.get(i);
+            if (deadM.has(enemy)) continue;
+            TransformComponent ePos = tm.get(enemy);
+            HitboxComponent eBox = hm.get(enemy);
+            if (checkCollision(pPos, ePos, pBox.radius, eBox.radius)) {
+                pH.currentHp -= 10f;
+                if (pH.currentHp <= 0) {
+                    playerEntity.add(getEngine().createComponent(FatalDamageComponent.class));
+                } else {
+                    playerEntity.add(getEngine().createComponent(InvincibilityComponent.class));
                 }
+                break;
             }
         }
     }
+
 
     private boolean checkCollision(TransformComponent bPos, TransformComponent ePos, float bRadius, float eRadius) {
         float dx = bPos.x - ePos.x;

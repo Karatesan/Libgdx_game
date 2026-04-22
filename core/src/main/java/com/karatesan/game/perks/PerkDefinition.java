@@ -6,6 +6,7 @@ public class PerkDefinition {
     public String id;
     public String name;
     public String description;
+    public Rarity rarity;
     public int maxLevel;
     public PerkLevel[] levels;
 

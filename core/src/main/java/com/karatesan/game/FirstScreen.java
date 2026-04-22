@@ -10,10 +10,7 @@ import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.karatesan.game.ecs.factory.EntityFactory;
 import com.karatesan.game.ecs.systems.combat.*;
 import com.karatesan.game.ecs.systems.combat.perks.RicochetPerkSystem;
-import com.karatesan.game.ecs.systems.core.CameraSystem;
-import com.karatesan.game.ecs.systems.core.CleanupSystem;
-import com.karatesan.game.ecs.systems.core.GameStateSystem;
-import com.karatesan.game.ecs.systems.core.LifeTimeSystem;
+import com.karatesan.game.ecs.systems.core.*;
 import com.karatesan.game.ecs.systems.economy.MagnetSystem;
 import com.karatesan.game.ecs.systems.economy.PerkApplicationSystem;
 import com.karatesan.game.ecs.systems.economy.PickupSystem;
@@ -23,7 +20,7 @@ import com.karatesan.game.ecs.systems.movement.EnemySystem;
 import com.karatesan.game.ecs.systems.movement.MovementSystem;
 import com.karatesan.game.ecs.systems.movement.PlayerInputSystem;
 import com.karatesan.game.ecs.systems.render.RenderSystem;
-import com.karatesan.game.ecs.systems.render.UISystem;
+import com.karatesan.game.ecs.systems.render.ui.UISystem;
 import com.karatesan.game.ecs.systems.waveSystem.WaveSpawnerSystem;
 
 /**
@@ -73,10 +70,11 @@ public class FirstScreen implements Screen {
         engine.addSystem(new EnemySystem());
         engine.addSystem(new EnemySeparationSystem());
         engine.addSystem(new MovementSystem());
-        engine.addSystem(new BulletSystem());
-        engine.addSystem(new CollisionSystem(entityFactory));
+        engine.addSystem(new BulletRangeSystem());
+        engine.addSystem(new CollisionSystem());
+        engine.addSystem(new HitEventProcessingSystem(entityFactory));
         engine.addSystem(new RicochetPerkSystem());
-        engine.addSystem(new BulletLifecycleSystem());
+        engine.addSystem(new PostHitBulletSystem());
         engine.addSystem(new CameraSystem(camera));
         engine.addSystem(new MagnetSystem());
         engine.addSystem(new PickupSystem());

@@ -4,8 +4,8 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.karatesan.game.ecs.components.combat.StatsComponent;
 import com.karatesan.game.ecs.components.economy.PullableComponent;
-import com.karatesan.game.ecs.components.economy.MagnetComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
 import com.karatesan.game.ecs.systems.core.PausableSystem;
@@ -15,7 +15,7 @@ public class MagnetSystem extends IteratingSystem implements PausableSystem {
 
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
-    private final ComponentMapper<MagnetComponent> mm = ComponentMapper.getFor(MagnetComponent.class);
+    private final ComponentMapper<StatsComponent> sm = ComponentMapper.getFor(StatsComponent.class);
 
     private Entity playerEntity;
 
@@ -32,10 +32,10 @@ public class MagnetSystem extends IteratingSystem implements PausableSystem {
 
     @Override
     protected void processEntity(Entity xpEntity, float deltaTime) {
-        if (playerEntity == null || !mm.has(playerEntity)) return;
+        if (playerEntity == null) return;
 
         TransformComponent pPos = tm.get(playerEntity);
-        MagnetComponent magnet = mm.get(playerEntity);
+        StatsComponent stats = sm.get(playerEntity);
 
         TransformComponent xpPos = tm.get(xpEntity);
         VelocityComponent xpVel = vm.get(xpEntity);
@@ -44,7 +44,7 @@ public class MagnetSystem extends IteratingSystem implements PausableSystem {
         float dx = pPos.x - xpPos.x;
         float dy = pPos.y - xpPos.y;
         float distSq = (dx * dx) + (dy * dy);
-        float magnetRadiusSq = magnet.radius * magnet.radius;
+        float magnetRadiusSq = stats.pickupRadius * stats.pickupRadius;
 
         // If the XP is inside the magnetic field...
         if (distSq <= magnetRadiusSq) {

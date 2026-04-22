@@ -4,18 +4,16 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.karatesan.game.ecs.components.combat.BulletComponent;
-import com.karatesan.game.ecs.components.core.LifeTimeComponent;
 import com.karatesan.game.ecs.components.event.PardonedComponent;
 import com.karatesan.game.ecs.components.tag.DeadComponent;
 import com.karatesan.game.ecs.components.event.HitEventComponent;
 import com.karatesan.game.ecs.systems.core.PausableSystem;
 
-public class BulletLifecycleSystem extends IteratingSystem implements PausableSystem {
+public class PostHitBulletSystem extends IteratingSystem implements PausableSystem {
     private final ComponentMapper<PardonedComponent> pm = ComponentMapper.getFor(PardonedComponent.class);
     private final ComponentMapper<HitEventComponent> em = ComponentMapper.getFor(HitEventComponent.class);
 
-    public BulletLifecycleSystem() {
+    public PostHitBulletSystem() {
         super(Family.all(HitEventComponent.class).get());
     }
 

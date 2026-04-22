@@ -13,3 +13,5 @@ public class DamagePayloadComponent implements Component, Poolable {
         isCrit = false;
     }
 }
+
+//bullet payload jest tworzony podczas tworzenia bulleta, jak leci ricochet to nie jest to juz robione i mamy domysln 0

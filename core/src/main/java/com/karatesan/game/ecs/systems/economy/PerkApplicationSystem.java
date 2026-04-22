@@ -5,12 +5,12 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.Gdx;
+import com.karatesan.game.ecs.components.combat.BulletDataComponent;
 import com.karatesan.game.ecs.components.combat.StatsComponent;
 import com.karatesan.game.ecs.components.combat.WeaponComponent;
 import com.karatesan.game.ecs.components.event.LevelUpComponent;
 import com.karatesan.game.ecs.components.perks.PerkChoiceComponent;
 import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
-import com.karatesan.game.ecs.components.perks.RicochetPerkComponent;
 import com.karatesan.game.perks.PerkDefinition;
 import com.karatesan.game.perks.PerkEffect;
 import com.karatesan.game.perks.PerkLevel;
@@ -26,10 +26,11 @@ public class PerkApplicationSystem extends IteratingSystem {
         PerkInventoryComponent.class);
     private final ComponentMapper<StatsComponent> statsM = ComponentMapper.getFor(StatsComponent.class);
     private final ComponentMapper<WeaponComponent> weaponM = ComponentMapper.getFor(WeaponComponent.class);
+    private final ComponentMapper<BulletDataComponent> bulletDataM = ComponentMapper.getFor(BulletDataComponent.class);
 
     public PerkApplicationSystem(PerkRegistry registry) {
         super(Family.all(PerkChoiceComponent.class, PerkInventoryComponent.class, StatsComponent.class,
-            WeaponComponent.class).get());
+            WeaponComponent.class, BulletDataComponent.class).get());
         this.registry = registry;
     }
 
@@ -118,16 +119,16 @@ public class PerkApplicationSystem extends IteratingSystem {
     }
 
     private void applyTraitAddition(Entity entity, PerkEffect effect) {
+        BulletDataComponent bulletData = bulletDataM.get(entity);
+
         switch (effect.target) {
             case "RICOCHET_CHANCE": {
-                RicochetPerkComponent c = entity.getComponent(RicochetPerkComponent.class);
-                if (c == null) {
-                    c = getEngine().createComponent(RicochetPerkComponent.class);
-                    entity.add(c);
-                }
-                c.chance += effect.value;
+                bulletData.ricochetChance = effect.value;
                 break;
             }
+            case "PIERCE":
+                bulletData.pierceCount = (int) effect.value;
+                break;
 
 
             // case "PIERCE": {
