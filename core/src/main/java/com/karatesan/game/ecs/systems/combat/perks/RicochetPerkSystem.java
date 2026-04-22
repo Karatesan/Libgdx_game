@@ -10,16 +10,15 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.karatesan.game.ecs.components.combat.BulletComponent;
-import com.karatesan.game.ecs.components.combat.BulletDataComponent;
 import com.karatesan.game.ecs.components.combat.DamagePayloadComponent;
 import com.karatesan.game.ecs.components.event.HitEventComponent;
 import com.karatesan.game.ecs.components.event.PardonedComponent;
+import com.karatesan.game.ecs.components.perks.PierceMarkerComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
 import com.karatesan.game.ecs.components.render.ShapeComponent;
 import com.karatesan.game.ecs.components.tag.DeadComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
-import com.karatesan.game.ecs.components.tag.PlayerComponent;
 import com.karatesan.game.ecs.systems.core.PausableSystem;
 
 public class RicochetPerkSystem extends IteratingSystem implements PausableSystem {
@@ -29,8 +28,11 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
     private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
     private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
     private final ComponentMapper<ShapeComponent> sm = ComponentMapper.getFor(ShapeComponent.class);
-    private final ComponentMapper<BulletDataComponent> bm = ComponentMapper.getFor(BulletDataComponent.class);
     private final ComponentMapper<DamagePayloadComponent> dm = ComponentMapper.getFor(DamagePayloadComponent.class);
+    private final ComponentMapper<BulletComponent> bm = ComponentMapper.getFor(BulletComponent.class);
+    private final ComponentMapper<PardonedComponent> pm = ComponentMapper.getFor(PardonedComponent.class);
+    private final ComponentMapper<PierceMarkerComponent> piercerMarkMap = ComponentMapper.getFor(
+        PierceMarkerComponent.class);
 
 
     // Cached references (Zero-GC lookups)
@@ -60,9 +62,11 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
     @Override
     protected void processEntity(Entity eventEntity, float deltaTime) {
         HitEventComponent hitEvent = hm.get(eventEntity);
-        BulletComponent bulletData = hitEvent.bullet.getComponent(BulletComponent.class);
+        BulletComponent bulletData = bm.get(hitEvent.bullet);
         if (bulletData.ricochetChance == 0 || bulletData.ricochetCount == 0) return;
-        // 2. The Jackpot Roll (Pure mathematical randomness)
+        // pierce get priority
+        //TODO think how to handle pierce + ricochet perks combined. Maybe only one can be picked?
+        if (piercerMarkMap.has(hitEvent.bullet)) return;
         if (MathUtils.random() <= bulletData.ricochetChance) {
             bulletData.ricochetCount--;
             TransformComponent bulletTx = tm.get(hitEvent.bullet);
@@ -94,7 +98,10 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
 
                 // 7. Grant the Pardon!
                 // This tells the BulletLifecycleSystem (which runs later) NOT to kill this bullet.
-                hitEvent.bullet.add(getEngine().createComponent(PardonedComponent.class));
+                // We check if some other perks like pierce did not add it before
+                if (!pm.has(hitEvent.bullet)) {
+                    hitEvent.bullet.add(getEngine().createComponent(PardonedComponent.class));
+                }
             }
         }
     }
@@ -125,7 +132,6 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
                 return enemy; // Instantly exit the loop!
             }
         }
-
         return null; // No enemies within bounce range
     }
 }

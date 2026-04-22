@@ -7,6 +7,7 @@ public class BulletDataComponent implements Component, Pool.Poolable {
     public float ricochetChance = 0f;
     public int ricochetCount = 0;
 
+
     public int pierceCount = 0;
     // future: explosionRadius, chainCount, knockback, etc.
 

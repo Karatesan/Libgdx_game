@@ -9,6 +9,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.karatesan.game.ecs.factory.EntityFactory;
 import com.karatesan.game.ecs.systems.combat.*;
+import com.karatesan.game.ecs.systems.combat.perks.PiercePerkSystem;
 import com.karatesan.game.ecs.systems.combat.perks.RicochetPerkSystem;
 import com.karatesan.game.ecs.systems.core.*;
 import com.karatesan.game.ecs.systems.economy.MagnetSystem;
@@ -73,6 +74,7 @@ public class FirstScreen implements Screen {
         engine.addSystem(new BulletRangeSystem());
         engine.addSystem(new CollisionSystem());
         engine.addSystem(new HitEventProcessingSystem(entityFactory));
+        engine.addSystem(new PiercePerkSystem());
         engine.addSystem(new RicochetPerkSystem());
         engine.addSystem(new PostHitBulletSystem());
         engine.addSystem(new CameraSystem(camera));

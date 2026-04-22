@@ -130,9 +130,10 @@ public class PerkApplicationSystem extends IteratingSystem {
                 bulletData.ricochetCount += (int) effect.value;
                 break;
             }
-            case "PIERCE":
+            case "PIERCE": {
                 bulletData.pierceCount += (int) effect.value;
                 break;
+            }
 
 
             // case "PIERCE": {

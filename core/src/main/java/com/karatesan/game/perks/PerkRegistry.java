@@ -11,7 +11,7 @@ import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
 public class PerkRegistry {
     private final ObjectMap<String, PerkDefinition> perks = new ObjectMap<>();
     //TODO remove once all perks are working
-    private final Array<String> included = new Array<>(new String[]{"bouncing_chaos"});
+    private final Array<String> included = new Array<>(new String[]{"bouncing_chaos", "depleted_uranium"});
 
     public PerkRegistry(FileHandle file) {
         Json json = new Json();
