@@ -147,8 +147,8 @@ public class EntityFactory {
     public void equipBasicWeapon(Entity player) {
         player.remove(WeaponComponent.class);
         WeaponComponent weapon = engine.createComponent(WeaponComponent.class);
-        weapon.minDamage = 100f;
-        weapon.maxDamage = 150f;
+        weapon.minDamage = 5F;
+        weapon.maxDamage = 10f;
         weapon.fireRate = 0.8f;
         weapon.projectileCount = 1;
         weapon.spreadAngle = 10f; // Slight inaccuracy

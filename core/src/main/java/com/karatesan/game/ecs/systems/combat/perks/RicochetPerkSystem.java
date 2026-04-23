@@ -69,6 +69,7 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
         if (piercerMarkMap.has(hitEvent.bullet)) return;
         if (MathUtils.random() <= bulletData.ricochetChance) {
             bulletData.ricochetCount--;
+            hitEvent.damage *= .8f;
             TransformComponent bulletTx = tm.get(hitEvent.bullet);
             VelocityComponent bulletVel = vm.get(hitEvent.bullet);
 
@@ -93,8 +94,6 @@ public class RicochetPerkSystem extends IteratingSystem implements PausableSyste
                 // 6. Apply the speed to the new normalized direction
                 bulletVel.x = TEMP_VECTOR.x * bulletVel.speed;
                 bulletVel.y = TEMP_VECTOR.y * bulletVel.speed;
-                DamagePayloadComponent payload = dm.get(hitEvent.bullet);
-                //payload.reset();
 
                 // 7. Grant the Pardon!
                 // This tells the BulletLifecycleSystem (which runs later) NOT to kill this bullet.

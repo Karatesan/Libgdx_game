@@ -29,6 +29,7 @@ public class PiercePerkSystem extends IteratingSystem implements PausableSystem 
             HitEventComponent hitEventComponent = hm.get(entity);
             bulletData.pierceCount--;
             bulletData.lastHit = hitEvent.targetEntity;
+            hitEventComponent.damage *= .8f;
             hitEventComponent.bullet.add(getEngine().createComponent(PierceMarkerComponent.class));
         }
     }
