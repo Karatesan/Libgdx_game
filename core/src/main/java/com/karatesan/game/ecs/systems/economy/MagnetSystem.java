@@ -4,41 +4,37 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.karatesan.game.ecs.components.combat.StatsComponent;
+import com.karatesan.game.config.GameConfig;
+import com.karatesan.game.config.GameContext;
+import com.karatesan.game.ecs.Mappers;
 import com.karatesan.game.ecs.components.economy.PullableComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
-import com.karatesan.game.ecs.systems.core.PausableSystem;
-import com.karatesan.game.ecs.utility.ECSUtils;
+import com.karatesan.game.ecs.components.stats.UtilityStatsComponent;
+import com.karatesan.game.ecs.utility.PausableSystem;
 
 public class MagnetSystem extends IteratingSystem implements PausableSystem {
 
-    private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
-    private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
-    private final ComponentMapper<StatsComponent> sm = ComponentMapper.getFor(StatsComponent.class);
+    private final GameContext context;
+    private final GameConfig config;
 
-    private Entity playerEntity;
-
-    public MagnetSystem() {
+    public MagnetSystem(GameContext context, GameConfig config) {
         // Look for ANYTHING that is Pullable and has a Transform/Velocity
         super(Family.all(PullableComponent.class, TransformComponent.class, VelocityComponent.class).get());
-    }
-
-    @Override
-    public void update(float deltaTime) {
-        playerEntity = ECSUtils.getPlayer(getEngine());
-        super.update(deltaTime);
+        this.context = context;
+        this.config = config;
     }
 
     @Override
     protected void processEntity(Entity xpEntity, float deltaTime) {
-        if (playerEntity == null) return;
+        Entity player = context.getPlayer();
+        if (player == null) return;
 
-        TransformComponent pPos = tm.get(playerEntity);
-        StatsComponent stats = sm.get(playerEntity);
+        TransformComponent pPos = Mappers.transform.get(player);
+        UtilityStatsComponent stats = Mappers.utility.get(player);
 
-        TransformComponent xpPos = tm.get(xpEntity);
-        VelocityComponent xpVel = vm.get(xpEntity);
+        TransformComponent xpPos = Mappers.transform.get(xpEntity);
+        VelocityComponent xpVel = Mappers.velocity.get(xpEntity);
 
         // Calculate distance squared (Zero-GC, highly performant)
         float dx = pPos.x - xpPos.x;
@@ -56,8 +52,7 @@ public class MagnetSystem extends IteratingSystem implements PausableSystem {
                 float nx = dx / distance;
                 float ny = dy / distance;
 
-                // The Pull Speed! 400f feels like a snappy, satisfying vacuum effect.
-                float pullSpeed = 220f;
+                float pullSpeed = config.pullSpeed;
 
                 xpVel.x = nx * pullSpeed;
                 xpVel.y = ny * pullSpeed;

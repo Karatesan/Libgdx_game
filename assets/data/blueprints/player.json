@@ -1,0 +1,14 @@
+{
+  "size": 30,
+  "maxHp": 100,
+  "hpRegen": 0,
+  "moveSpeed": 160,
+  "critChance": 0.05,
+  "critMultiplier": 1.50,
+  "damageMultiplier": 1.0,
+  "armor": 0,
+  "dodgeChance": 0,
+  "pickupRadius": 50,
+  "xpMultiplier": 3.0,
+  "luck": 0
+}

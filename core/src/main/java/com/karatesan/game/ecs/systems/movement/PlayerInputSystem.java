@@ -1,44 +1,39 @@
 package com.karatesan.game.ecs.systems.movement;
 
-import com.badlogic.ashley.core.ComponentMapper;
+import com.karatesan.game.ecs.components.weapon.WeaponStateComponent;
+import com.karatesan.game.ecs.Mappers;
+
 import com.badlogic.ashley.core.Entity;
-import com.badlogic.ashley.core.Family;
-import com.badlogic.ashley.systems.IteratingSystem;
+import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.karatesan.game.config.GameContext;
 import com.karatesan.game.ecs.components.physics.MovementComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
-import com.karatesan.game.ecs.components.tag.PlayerComponent;
-import com.karatesan.game.ecs.systems.core.PausableSystem;
+import com.karatesan.game.ecs.utility.PausableSystem;
 
-public class PlayerInputSystem extends IteratingSystem implements PausableSystem {
-
-    private final ComponentMapper<TransformComponent> tm = ComponentMapper.getFor(TransformComponent.class);
-    private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
-    private final ComponentMapper<MovementComponent> mm = ComponentMapper.getFor(MovementComponent.class);
-    private final ComponentMapper<PlayerComponent> pm = ComponentMapper.getFor(PlayerComponent.class);
-
+public class PlayerInputSystem extends EntitySystem implements PausableSystem {
 
     private final OrthographicCamera camera;
     private final Vector3 mousePos = new Vector3();
+    private final GameContext context;
 
-    public PlayerInputSystem(OrthographicCamera camera) {
-        // Only process entities with the Player Tag, Transform, and Velocity
-        super(Family.all(PlayerComponent.class, TransformComponent.class, VelocityComponent.class).get());
+    public PlayerInputSystem(OrthographicCamera camera, GameContext context) {
         this.camera = camera;
+        this.context = context;
     }
 
     @Override
-    protected void processEntity(Entity entity, float deltaTime) {
-        TransformComponent transform = tm.get(entity);
-        VelocityComponent velocity = vm.get(entity);
-        MovementComponent movement = mm.get(entity);
-        PlayerComponent player = pm.get(entity);
+    public void update(float deltaTime) {
+        Entity playerEntity = context.getPlayer();
+        TransformComponent transform = Mappers.transform.get(playerEntity);
+        VelocityComponent velocity = Mappers.velocity.get(playerEntity);
+        MovementComponent movement = Mappers.movement.get(playerEntity);
 
         processMovement(velocity, movement.maxSpeed);
 
@@ -49,7 +44,8 @@ public class PlayerInputSystem extends IteratingSystem implements PausableSystem
         float angleInRadians = MathUtils.atan2(mousePos.y - transform.y, mousePos.x - transform.x);
         transform.rotation = angleInRadians * MathUtils.radiansToDegrees;
 
-        player.isShooting = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
+        WeaponStateComponent weaponStateComponent = Mappers.weaponState.get(playerEntity);
+        weaponStateComponent.isShooting = Gdx.input.isButtonPressed(Input.Buttons.LEFT);
     }
 
     private void processMovement(VelocityComponent velocity, float speed) {

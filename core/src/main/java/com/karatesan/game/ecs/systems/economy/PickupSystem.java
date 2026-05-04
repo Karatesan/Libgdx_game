@@ -4,14 +4,14 @@ import com.badlogic.ashley.core.ComponentMapper;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
+import com.karatesan.game.config.GameContext;
 import com.karatesan.game.ecs.components.economy.CollectibleComponent;
 import com.karatesan.game.ecs.components.core.SessionComponent;
 import com.karatesan.game.ecs.components.economy.XpComponent;
 import com.karatesan.game.ecs.components.event.CollectedEventComponent;
 import com.karatesan.game.ecs.components.physics.HitboxComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
-import com.karatesan.game.ecs.systems.core.PausableSystem;
-import com.karatesan.game.ecs.utility.ECSUtils;
+import com.karatesan.game.ecs.utility.PausableSystem;
 
 public class PickupSystem extends IteratingSystem implements PausableSystem {
 
@@ -20,24 +20,20 @@ public class PickupSystem extends IteratingSystem implements PausableSystem {
     private final ComponentMapper<XpComponent> xm = ComponentMapper.getFor(XpComponent.class);
     private final ComponentMapper<SessionComponent> sm = ComponentMapper.getFor(SessionComponent.class);
 
-    private Entity playerEntity;
+    private GameContext context;
 
-    public PickupSystem() {
+    public PickupSystem(GameContext context) {
         super(Family.all(CollectibleComponent.class, TransformComponent.class, HitboxComponent.class).get());
-    }
-
-    @Override
-    public void update(float deltaTime) {
-        playerEntity = ECSUtils.getPlayer(getEngine());
-        super.update(deltaTime);
+        this.context = context;
     }
 
     @Override
     protected void processEntity(Entity item, float deltaTime) {
-        if (playerEntity == null) return;
+        Entity player = context.getPlayer();
+        if (player == null) return;
 
-        TransformComponent pPos = tm.get(playerEntity);
-        HitboxComponent pBox = hm.get(playerEntity);
+        TransformComponent pPos = tm.get(player);
+        HitboxComponent pBox = hm.get(player);
 
         TransformComponent xpPos = tm.get(item);
         HitboxComponent xpBox = hm.get(item);

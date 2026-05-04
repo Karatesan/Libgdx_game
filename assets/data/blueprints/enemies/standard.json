@@ -1,0 +1,9 @@
+{
+  "maxHp": 25,
+  "moveSpeed": 90,
+  "hitboxRadius": 15,
+  "visualSize": 30,
+  "contactDamage": 15,
+  "xpDrop": 5,
+  "color": "FFFFFFFF"
+}

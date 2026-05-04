@@ -4,21 +4,33 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.PooledEngine;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.MathUtils;
+import com.karatesan.game.data.blueprints.PlayerBlueprint;
+import com.karatesan.game.data.blueprints.WeaponBlueprint;
+import com.karatesan.game.data.registry.BlueprintRegistry;
+import com.karatesan.game.ecs.components.stats.HealthComponent;
+import com.karatesan.game.ecs.components.weapon.ProjectileDistanceTravelledComponent;
+import com.karatesan.game.ecs.components.weapon.WeaponComponent;
+import com.karatesan.game.ecs.components.weapon.WeaponStateComponent;
+import com.karatesan.game.config.GameConfig;
+import com.karatesan.game.ecs.components.economy.*;
 import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
+import com.karatesan.game.ecs.components.perks.PierceComponent;
+import com.karatesan.game.ecs.components.perks.RicochetComponent;
 import com.karatesan.game.ecs.components.render.FloatingTextComponent;
 import com.karatesan.game.ecs.components.combat.*;
 import com.karatesan.game.ecs.components.core.LifeTimeComponent;
 import com.karatesan.game.ecs.components.core.SessionComponent;
-import com.karatesan.game.ecs.components.economy.CollectibleComponent;
-import com.karatesan.game.ecs.components.economy.PullableComponent;
-import com.karatesan.game.ecs.components.economy.XpComponent;
 import com.karatesan.game.ecs.components.physics.HitboxComponent;
 import com.karatesan.game.ecs.components.physics.MovementComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
 import com.karatesan.game.ecs.components.render.ShapeComponent;
+import com.karatesan.game.ecs.components.stats.DefenseStatsComponent;
+import com.karatesan.game.ecs.components.stats.OffensiveStatsComponent;
+import com.karatesan.game.ecs.components.stats.UtilityStatsComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
+import com.karatesan.game.ecs.components.combat.ContactDamageComponent;
 
 public class EntityFactory {
     private static final float[] OFFSET_X = {-13f, 0f, 13f, -19f, 19f, -10f, 10f, 0f};
@@ -27,68 +39,94 @@ public class EntityFactory {
     private int textOffsetIndex = 0;
 
     private final PooledEngine engine;
+    private final GameConfig config;
+    private final BlueprintRegistry blueprints;
 
-    public EntityFactory(PooledEngine engine) {
+
+    public EntityFactory(PooledEngine engine, GameConfig config, BlueprintRegistry blueprints) {
         this.engine = engine;
+        this.config = config;
+        this.blueprints = blueprints;
     }
 
-    public Entity createEntity() {
-        return engine.createEntity();
-    }
-
-    public void createPlayer() {
+    public Entity createPlayer(float x, float y) {
         // Ask the engine for a clean, recycled Entity
         Entity player = engine.createEntity();
+        PlayerBlueprint pb = blueprints.getPlayer();
+        WeaponBlueprint wb = blueprints.getWeapon();
 
         // Ask the engine for clean, recycled Components
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
         PlayerComponent playerTag = engine.createComponent(PlayerComponent.class);
         ShapeComponent shape = engine.createComponent(ShapeComponent.class);
-        StatsComponent stats = engine.createComponent(StatsComponent.class);
         MovementComponent movement = engine.createComponent(MovementComponent.class);
         HealthComponent health = engine.createComponent(HealthComponent.class);
         HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
         PerkInventoryComponent inventory = engine.createComponent(PerkInventoryComponent.class);
-
+        WeaponStateComponent weaponState = engine.createComponent(WeaponStateComponent.class);
+        OffensiveStatsComponent offensiveStats = engine.createComponent(OffensiveStatsComponent.class);
+        DefenseStatsComponent defensiveComponent = engine.createComponent(DefenseStatsComponent.class);
+        UtilityStatsComponent utilityComponent = engine.createComponent(UtilityStatsComponent.class);
         // Set the starting data
-        transform.x = 400;
-        transform.y = 300;
+        transform.x = x;
+        transform.y = y;
         transform.z = 1;
-        transform.size = 32;
+        transform.size = pb.size;
         // Velocity starts at 0, the InputSystem will change it!
         velocity.x = 0;
         velocity.y = 0;
         shape.color = Color.BROWN;
 
-        movement.maxSpeed = 100f;
+        movement.maxSpeed = pb.moveSpeed;
 
-        health.maxHp = 100f;
-        health.currentHp = 100f;
+        health.maxHp = pb.maxHp;
+        health.currentHp = pb.maxHp;
+        health.hpRegen = pb.hpRegen;
 
-        hitbox.radius = 16f; // Half of size 32
+        hitbox.radius = pb.size / 2; // Half of size
 
-        BulletDataComponent bulletData = engine.createComponent(BulletDataComponent.class);
+        offensiveStats.critMultiplier = pb.critMultiplier;
+        offensiveStats.critChance = pb.critChance;
+
+        defensiveComponent.dodgeChance = pb.dodgeChance;
+        defensiveComponent.armor = pb.armor;
+
+        utilityComponent.luck = pb.luck;
+        utilityComponent.pickupRadius = pb.pickupRadius;
+        utilityComponent.xpMultiplier = pb.xpMultiplier;
+
+        ProjectileTemplateComponent projectileTemplate = engine.createComponent(ProjectileTemplateComponent.class);
+        projectileTemplate.explosionRadius = config.explosionRadius;
+        projectileTemplate.explosionDamageRatio = config.explosionDamageRatio;
+        projectileTemplate.ricochetDamageRetention = config.ricochetBaseRetention;
+        projectileTemplate.pierceDamageRetention = config.pierceDamageRetention;
+
+        LevelDataComponent levelComponent = engine.createComponent(LevelDataComponent.class);
         // Glue the components to the Entity
         player.add(transform);
         player.add(velocity);
         player.add(playerTag);
         player.add(shape);
-        player.add(stats);
+        player.add(offensiveStats);
+        player.add(defensiveComponent);
+        player.add(utilityComponent);
         player.add(movement);
         player.add(health);
         player.add(hitbox);
         player.add(inventory);
-        player.add(bulletData);
-        equipBasicWeapon(player);
+        player.add(projectileTemplate);
+        player.add(weaponState);
+        player.add(levelComponent);
+        equipBasicWeapon(player, wb);
 
         // Add the finished Entity to the Engine
         engine.addEntity(player);
+        return player;
     }
 
-    public void createEnemy(float x, float y, EnemyType type) {
+    public void createEnemy(float x, float y, EnemyType type, float currentHpScale) {
         Entity enemy = engine.createEntity();
-
 
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.x = x;
@@ -102,66 +140,78 @@ public class EntityFactory {
         HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
         ShapeComponent shape = engine.createComponent(ShapeComponent.class);
 
+        //Defense
+        DefenseStatsComponent defense = engine.createComponent(DefenseStatsComponent.class);
+        defense.dodgeChance = 0f;
+        defense.armor = 0;
+
         // 1. Base Components (Every enemy gets these)
         EnemyComponent enemyComp = engine.createComponent(EnemyComponent.class);
+        LootDropComponent xpDrop = engine.createComponent(LootDropComponent.class);
+        ContactDamageComponent contactDamage = engine.createComponent(ContactDamageComponent.class);
 
         // 3. The Data-Driven Configuration
         switch (type) {
             case STANDARD:
-                health.maxHp = 20f;
+                health.maxHp = 20f * currentHpScale;
                 movement.maxSpeed = 100f;
                 hitbox.radius = 15f;
                 transform.size = 30f; // Visual size (Diameter)
                 shape.color = Color.WHITE;
-                enemyComp.xpDropValue = 3f;
+                xpDrop.xpValue = 3;
+                contactDamage.damage = 15;
                 break;
 
             case SWARMER:
-                health.maxHp = 5f; // Dies in 1 hit usually
+                health.maxHp = 5f * currentHpScale; // Dies in 1 hit usually
                 movement.maxSpeed = 220f; // Extremely fast!
                 hitbox.radius = 8f; // Harder to hit
                 transform.size = 16f;
                 shape.color = Color.RED; // Red = Danger/Fast
-                enemyComp.xpDropValue = 1f;
+                xpDrop.xpValue = 1;
+                contactDamage.damage = 8;
                 break;
 
             case TANK:
-                health.maxHp = 150f; // Bullet sponge
+                health.maxHp = 150f * currentHpScale; // Bullet sponge
                 movement.maxSpeed = 40f; // Very slow, creeping doom
                 hitbox.radius = 35f; // Massive body blocks bullets
                 transform.size = 70f;
                 shape.color = Color.ROYAL; // Purple/Blue = Heavy
-                enemyComp.xpDropValue = 15f;
+                xpDrop.xpValue = 15;
+                contactDamage.damage = 30;
                 break;
         }
 
         health.currentHp = health.maxHp;
 
-        enemy.add(transform).add(velocity).add(health).add(movement).add(hitbox).add(shape).add(enemyComp);
+        enemy.add(transform).add(velocity).add(health).add(movement).add(hitbox).add(shape).add(enemyComp).add(
+            contactDamage).add(xpDrop).add(defense);
 
         engine.addEntity(enemy);
     }
 
-
     // --- WEAPON CONFIGURATORS ---
-    public void equipBasicWeapon(Entity player) {
+    public void equipBasicWeapon(Entity player, WeaponBlueprint wb) {
         player.remove(WeaponComponent.class);
         WeaponComponent weapon = engine.createComponent(WeaponComponent.class);
-        weapon.minDamage = 5F;
-        weapon.maxDamage = 10f;
-        weapon.fireRate = 0.8f;
-        weapon.projectileCount = 1;
-        weapon.spreadAngle = 10f; // Slight inaccuracy
-        weapon.projectileSpeed = 1000f;
-        weapon.range = 500f;
+        weapon.minDamage = wb.minDamage;
+        weapon.maxDamage = wb.maxDamage;
+        weapon.fireRate = wb.fireRate;
+        weapon.projectileCount = wb.projectileCount;
+        weapon.spreadAngle = wb.spreadAngle;
+        weapon.inaccuracy = wb.inaccuracy;
+        weapon.projectileSpeed = wb.projectileSpeed;
+        weapon.range = wb.range;
 
         player.add(weapon);
     }
 
     // --- BULLET SPAWNER ---
     // Your WeaponSystem will call this method!
-    public void createBullet(TransformComponent playerTransform, WeaponComponent weapon, BulletDataComponent bulletData,
-                             StatsComponent stats, float angle) {
+    public void createBullet(TransformComponent playerTransform, WeaponComponent weapon,
+                             ProjectileTemplateComponent projectileTemplate, OffensiveStatsComponent stats,
+                             float angle) {
         Entity bullet = engine.createEntity();
 
         boolean isCrit = MathUtils.random() <= stats.critChance;
@@ -171,7 +221,7 @@ public class EntityFactory {
         transform.x = playerTransform.x;
         transform.y = playerTransform.y;
         transform.z = 2;
-        transform.size = 4; //TODO hardcoded bullet size
+        transform.size = config.bulletSize;
         transform.rotation = angle;
 
         float angleRad = angle * MathUtils.degreesToRadians;
@@ -190,19 +240,31 @@ public class EntityFactory {
         bulletTag.startX = playerTransform.x;
         bulletTag.startY = playerTransform.y;
 
-        //STAMP PERKS -------------------------------------------------------
-        bulletTag.pierceCount = bulletData.pierceCount;
-        bulletTag.ricochetChance = bulletData.ricochetChance;
-        bulletTag.ricochetCount = bulletData.ricochetCount;
+        //Perks
+
+        if (projectileTemplate.ricochetChance > 0) {
+            RicochetComponent ricochet = engine.createComponent(RicochetComponent.class);
+            ricochet.ricochetCount = projectileTemplate.ricochetCount;
+            ricochet.ricochetChance = projectileTemplate.ricochetChance;
+            ricochet.ricochetDamageRetention = projectileTemplate.ricochetDamageRetention;
+            bullet.add(ricochet);
+        }
+        if (projectileTemplate.pierceCount > 0) {
+            PierceComponent pierce = engine.createComponent(PierceComponent.class);
+            pierce.pierceCount = projectileTemplate.pierceCount;
+            pierce.pierceDamageRetention = projectileTemplate.pierceDamageRetention;
+            bullet.add(pierce);
+        }
+
+        ProjectileDistanceTravelledComponent distanceTravelled = engine.createComponent(
+            ProjectileDistanceTravelledComponent.class);
 
         DamagePayloadComponent payload = engine.createComponent(DamagePayloadComponent.class);
         payload.damage = damage;
         payload.isCrit = isCrit;
 
         HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
-        hitbox.radius = 4;
-
-        PierceComponent pierceComponent = engine.createComponent(PierceComponent.class);
+        hitbox.radius = config.bulletSize;
 
         bullet.add(transform);
         bullet.add(velocity);
@@ -210,12 +272,12 @@ public class EntityFactory {
         bullet.add(bulletTag);
         bullet.add(payload);
         bullet.add(hitbox);
-        bullet.add(pierceComponent);
+        bullet.add(distanceTravelled);
 
         engine.addEntity(bullet);
     }
 
-    private float calculateDamage(float minDamage, float maxDamage, StatsComponent stats, boolean isCrit) {
+    private float calculateDamage(float minDamage, float maxDamage, OffensiveStatsComponent stats, boolean isCrit) {
         float damage = MathUtils.random(minDamage, maxDamage);
         damage *= stats.damageMultiplier;
         if (isCrit) {
@@ -269,15 +331,70 @@ public class EntityFactory {
         engine.addEntity(bullet);
     }
 
-    public void createSession() {
+    public Entity createSession() {
         Entity sessionEntity = engine.createEntity();
         SessionComponent sessionData = engine.createComponent(SessionComponent.class);
         sessionEntity.add(sessionData);
         engine.addEntity(sessionEntity);
+        return sessionEntity;
     }
 
-    public void createDamageText(Entity enemy, float damage, boolean isCrit) {
+    public void createDamageText(Entity enemy, float damage, FloatingTextStyle floatingTextStyle) {
         Entity text = engine.createEntity();
+
+        // 1. Setup Lifetime
+        LifeTimeComponent lifetime = engine.createComponent(LifeTimeComponent.class);
+
+        // 2. Setup Text Data (Store INT, not String)
+        FloatingTextComponent txt = engine.createComponent(FloatingTextComponent.class);
+        txt.damageValue = MathUtils.round(damage);
+        txt.color = floatingTextStyle.color;
+
+        //Pick scale based on damage type
+        if (floatingTextStyle == FloatingTextStyle.CRIT) {
+            txt.scale = FloatingTextStyle.CRIT.scale;
+            lifetime.timer = FloatingTextStyle.CRIT.lifetime;
+            lifetime.maxTime = FloatingTextStyle.CRIT.lifetime;
+        }
+        else if (floatingTextStyle == FloatingTextStyle.ARMORED) {
+            txt.scale = FloatingTextStyle.ARMORED.scale;
+            lifetime.timer = FloatingTextStyle.ARMORED.lifetime;
+            lifetime.maxTime =FloatingTextStyle.ARMORED.lifetime;
+        }
+        else {
+            txt.scale = FloatingTextStyle.DAMAGE.scale;
+            lifetime.timer = FloatingTextStyle.DAMAGE.lifetime;
+            lifetime.maxTime = FloatingTextStyle.DAMAGE.lifetime;
+        }
+
+        // 3. Setup Position (Copy enemy's current position)
+        TransformComponent enemyPos = enemy.getComponent(TransformComponent.class);
+        TransformComponent transform = engine.createComponent(TransformComponent.class);
+        transform.x = enemyPos.x + OFFSET_X[textOffsetIndex];
+        transform.y = enemyPos.y + OFFSET_Y[textOffsetIndex];
+        transform.z = 3;
+
+        // 4. Setup "Fountain" Velocity (Jitter)
+        VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
+        // Multiply the X offset by 1.5.
+        // If it spawned at -20 (left), it flies left at -30 speed.
+        // If it spawned at +30 (right), it flies right at +45 speed.
+        velocity.x = OFFSET_X[textOffsetIndex] * 0.35f;
+
+        // Give it a base upward speed (40f), plus a little extra based on its Y offset.
+        // Higher spawning numbers will fly slightly faster so they don't get rear-ended.
+        velocity.y = 10f + (OFFSET_Y[textOffsetIndex] * 0.27f);
+
+        textOffsetIndex++;
+        if (textOffsetIndex >= OFFSET_X.length) {
+            textOffsetIndex = 0;
+        }
+        text.add(lifetime).add(txt).add(transform).add(velocity);
+        engine.addEntity(text);
+    }
+
+    public void createFloatingText(Entity enemy, String text, FloatingTextStyle type) {
+        Entity textEntity = engine.createEntity();
 
         // 1. Setup Lifetime
         LifeTimeComponent lifetime = engine.createComponent(LifeTimeComponent.class);
@@ -285,11 +402,9 @@ public class EntityFactory {
         lifetime.maxTime = 0.5f;
 
         // 2. Setup Text Data (Store INT, not String)
-        FloatingTextComponent txt = engine.createComponent(FloatingTextComponent.class);
-        txt.damageValue = MathUtils.round(damage);
-        txt.color = isCrit ? Color.RED : Color.WHITE;
-
-        txt.scale = isCrit ? 1f : .75f;
+        FloatingTextComponent floatingTextComponent = engine.createComponent(FloatingTextComponent.class);
+        floatingTextComponent.color = type.color;
+        floatingTextComponent.text = text;
 
         // 3. Setup Position (Copy enemy's current position)
         TransformComponent enemyPos = enemy.getComponent(TransformComponent.class);
@@ -314,11 +429,11 @@ public class EntityFactory {
             textOffsetIndex = 0;
         }
 
-        text.add(lifetime).add(txt).add(transform).add(velocity);
-        engine.addEntity(text);
+        textEntity.add(lifetime).add(floatingTextComponent).add(transform).add(velocity);
+        engine.addEntity(textEntity);
     }
 
-    public void createXpDrop(float x, float y, float value) {
+    public void createXpDrop(float x, float y, int value) {
         Entity xp = engine.createEntity();
 
         TransformComponent transform = engine.createComponent(TransformComponent.class);

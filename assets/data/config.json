@@ -1,0 +1,151 @@
+{
+  "viewportWidth": 800,
+  "viewportHeight": 600,
+  "waveChangeTime": 60,
+  "waveTextDuration": 3,
+  "maxEnemiesOnScreen": 300,
+  "spawnRadius": 600,
+  "arcStepAngle": 15,
+  "formationScatterWeight": 70,
+  "formationArcWeight": 20,
+  "pullSpeed": 220,
+  "waves": [
+    {
+      "spawnInterval": 1.40,
+      "spawnCount": 1,
+      "standardPct": 100,
+      "swarmerPct": 0,
+      "tankPct": 0,
+      "hpScale": 1.00
+    },
+    {
+      "spawnInterval": 1.20,
+      "spawnCount": 1,
+      "standardPct": 70,
+      "swarmerPct": 30,
+      "tankPct": 0,
+      "hpScale": 1.00
+    },
+    {
+      "spawnInterval": 1.00,
+      "spawnCount": 2,
+      "standardPct": 55,
+      "swarmerPct": 40,
+      "tankPct": 5,
+      "hpScale": 1.00
+    },
+    {
+      "spawnInterval": 0.90,
+      "spawnCount": 2,
+      "standardPct": 50,
+      "swarmerPct": 35,
+      "tankPct": 15,
+      "hpScale": 1.10
+    },
+    {
+      "spawnInterval": 0.75,
+      "spawnCount": 3,
+      "standardPct": 40,
+      "swarmerPct": 40,
+      "tankPct": 20,
+      "hpScale": 1.15
+    },
+    {
+      "spawnInterval": 0.70,
+      "spawnCount": 3,
+      "standardPct": 35,
+      "swarmerPct": 45,
+      "tankPct": 20,
+      "hpScale": 1.20
+    },
+    {
+      "spawnInterval": 0.65,
+      "spawnCount": 3,
+      "standardPct": 30,
+      "swarmerPct": 45,
+      "tankPct": 25,
+      "hpScale": 1.30
+    },
+    {
+      "spawnInterval": 0.55,
+      "spawnCount": 4,
+      "standardPct": 25,
+      "swarmerPct": 50,
+      "tankPct": 25,
+      "hpScale": 1.40
+    },
+    {
+      "spawnInterval": 0.50,
+      "spawnCount": 4,
+      "standardPct": 25,
+      "swarmerPct": 45,
+      "tankPct": 30,
+      "hpScale": 1.50
+    },
+    {
+      "spawnInterval": 0.45,
+      "spawnCount": 5,
+      "standardPct": 20,
+      "swarmerPct": 50,
+      "tankPct": 30,
+      "hpScale": 1.65
+    },
+    {
+      "spawnInterval": 0.40,
+      "spawnCount": 5,
+      "standardPct": 20,
+      "swarmerPct": 50,
+      "tankPct": 30,
+      "hpScale": 1.80
+    },
+    {
+      "spawnInterval": 0.35,
+      "spawnCount": 6,
+      "standardPct": 15,
+      "swarmerPct": 50,
+      "tankPct": 35,
+      "hpScale": 2.00
+    },
+    {
+      "spawnInterval": 0.35,
+      "spawnCount": 6,
+      "standardPct": 15,
+      "swarmerPct": 45,
+      "tankPct": 40,
+      "hpScale": 2.25
+    },
+    {
+      "spawnInterval": 0.35,
+      "spawnCount": 7,
+      "standardPct": 10,
+      "swarmerPct": 50,
+      "tankPct": 40,
+      "hpScale": 2.50
+    },
+    {
+      "spawnInterval": 0.35,
+      "spawnCount": 7,
+      "standardPct": 10,
+      "swarmerPct": 50,
+      "tankPct": 40,
+      "hpScale": 2.80
+    }
+  ],
+  "iFramesDuration": 0.40,
+  "fireRateFloor": 0.08,
+  "fireRateCeiling": 3.0,
+  "critChanceFloor": 0,
+  "critChanceCeiling": 0.8,
+  "bulletSize": 4,
+
+  "separationForce": 150,
+
+  "xpFormulaBase": 20,
+  "xpFormulaExponent": 1.35,
+
+  "pierceDamageRetention": 0.85,
+  "ricochetBaseRetention": 0.85,
+  "ricochetMaxBounceRange": 250,
+  "explosionRadius": 0.60,
+  "explosionDamageRatio": 0.50
+}

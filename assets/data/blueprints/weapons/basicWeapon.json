@@ -1,0 +1,11 @@
+{
+  "id": "basic_weapon",
+  "minDamage": 8,
+  "maxDamage": 15,
+  "fireRate": 0.45,
+  "projectileCount": 1,
+  "spreadAngle": 0,
+  "inaccuracy": 5,
+  "projectileSpeed": 850,
+  "range": 450
+}

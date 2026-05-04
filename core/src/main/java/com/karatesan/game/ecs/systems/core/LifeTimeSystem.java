@@ -7,8 +7,9 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.karatesan.game.ecs.components.core.LifeTimeComponent;
 import com.karatesan.game.ecs.components.render.FloatingTextComponent;
 import com.karatesan.game.ecs.components.tag.DeadComponent;
+import com.karatesan.game.ecs.utility.PausableSystem;
 
-public class LifeTimeSystem extends IteratingSystem implements PausableSystem{
+public class LifeTimeSystem extends IteratingSystem implements PausableSystem {
     private final ComponentMapper<LifeTimeComponent> lm = ComponentMapper.getFor(LifeTimeComponent.class);
 
     public LifeTimeSystem() {

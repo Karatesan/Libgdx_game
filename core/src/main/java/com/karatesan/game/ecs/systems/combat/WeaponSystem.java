@@ -1,62 +1,63 @@
 package com.karatesan.game.ecs.systems.combat;
 
 import com.badlogic.ashley.core.*;
-import com.badlogic.ashley.systems.IteratingSystem;
 import com.badlogic.gdx.math.MathUtils;
-import com.karatesan.game.ecs.components.combat.BulletComponent;
-import com.karatesan.game.ecs.components.combat.BulletDataComponent;
-import com.karatesan.game.ecs.components.combat.StatsComponent;
-import com.karatesan.game.ecs.components.combat.WeaponComponent;
+import com.karatesan.game.ecs.components.combat.ProjectileTemplateComponent;
+import com.karatesan.game.ecs.components.weapon.WeaponComponent;
+import com.karatesan.game.ecs.components.weapon.WeaponStateComponent;
+import com.karatesan.game.config.GameContext;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
-import com.karatesan.game.ecs.components.tag.PlayerComponent;
+import com.karatesan.game.ecs.components.stats.OffensiveStatsComponent;
 import com.karatesan.game.ecs.factory.EntityFactory;
-import com.karatesan.game.ecs.systems.core.PausableSystem;
+import com.karatesan.game.ecs.Mappers;
+import com.karatesan.game.ecs.utility.PausableSystem;
 
-public class WeaponSystem extends IteratingSystem implements PausableSystem {
+public class WeaponSystem extends EntitySystem implements PausableSystem {
 
     private final EntityFactory entityFactory;
-    private final ComponentMapper<TransformComponent> tc = ComponentMapper.getFor(TransformComponent.class);
-    private final ComponentMapper<PlayerComponent> pc = ComponentMapper.getFor(PlayerComponent.class);
-    private final ComponentMapper<WeaponComponent> wc = ComponentMapper.getFor(WeaponComponent.class);
-    private final ComponentMapper<StatsComponent> sc = ComponentMapper.getFor(StatsComponent.class);
-    private final ComponentMapper<BulletDataComponent> bm = ComponentMapper.getFor(BulletDataComponent.class);
+    private final GameContext context;
 
-    public WeaponSystem(EntityFactory entityFactory) {
-        super(Family.all(TransformComponent.class, PlayerComponent.class, WeaponComponent.class, StatsComponent.class,
-            BulletDataComponent.class).get());
+    public WeaponSystem(EntityFactory entityFactory, GameContext context) {
         this.entityFactory = entityFactory;
+        this.context = context;
     }
 
     @Override
-    protected void processEntity(Entity entity, float deltaTime) {
-        TransformComponent transform = tc.get(entity);
-        StatsComponent stats = sc.get(entity);
-        WeaponComponent weapon = wc.get(entity);
-        PlayerComponent player = pc.get(entity);
-        BulletDataComponent bulletData = bm.get(entity);
+    public void update(float deltaTime) {
+        Entity player = context.getPlayer();
+        TransformComponent transform = Mappers.transform.get(player);
+        OffensiveStatsComponent stats = Mappers.offense.get(player);
+        WeaponComponent weapon = Mappers.weapon.get(player);
+        ProjectileTemplateComponent bulletData = Mappers.template.get(player);
+        WeaponStateComponent weaponStateComponent = Mappers.weaponState.get(player);
 
-        weapon.shootTimer += deltaTime;
+        weaponStateComponent.shootTimer += deltaTime;
 
-        if (player.isShooting && weapon.shootTimer >= weapon.fireRate) {
+        if (weaponStateComponent.isShooting && weaponStateComponent.shootTimer >= weapon.fireRate) {
             for (int i = 0; i < weapon.projectileCount; i++) {
                 shootAndCreateBullet(stats, weapon, transform, (float) i, bulletData);
             }
-            weapon.shootTimer = 0;
+            weaponStateComponent.shootTimer = 0;
         }
     }
 
-    private void shootAndCreateBullet(StatsComponent stats, WeaponComponent weapon, TransformComponent transform,
-                                      float i, BulletDataComponent bulletData) {
-        // 1. Calculate the starting angle (in degrees)
+    private void shootAndCreateBullet(OffensiveStatsComponent stats, WeaponComponent weapon,
+                                      TransformComponent transform, float i, ProjectileTemplateComponent bulletData) {
         float baseAngleDeg = transform.rotation;
         float angleOffset = 0;
-        // 'i' is your current loop index
+
         if (weapon.projectileCount > 1) {
             float fraction = i / (weapon.projectileCount - 1);
             angleOffset = (fraction - 0.5f) * weapon.spreadAngle;
         }
-        // Apply the offset
-        float finalAngle = baseAngleDeg + angleOffset;
+
+        // Inaccuracy: random drift per bullet
+        float drift = 0;
+        if (weapon.inaccuracy > 0) {
+            drift = MathUtils.random(-weapon.inaccuracy, weapon.inaccuracy);
+        }
+
+        float finalAngle = baseAngleDeg + angleOffset + drift;
 
         entityFactory.createBullet(transform, weapon, bulletData, stats, finalAngle);
     }

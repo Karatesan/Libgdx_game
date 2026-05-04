@@ -151,8 +151,12 @@ public class RenderSystem extends SortedIteratingSystem {
         // A. Wipe the shared memory buffer (O(1) operation)
         sharedText.clear();
 
-        // B. Append the raw integer (No Strings created!)
-        sharedText.append(text.damageValue);
+        // B. Append the raw integer (No Strings created!) - based on whether we render text or number
+        if (text.text != null) {
+            sharedText.append(text.text);
+        } else {
+            sharedText.append(text.damageValue);
+        }
 
         // C. Set color and draw directly from the buffer
         bitmapFont.setColor(text.color);

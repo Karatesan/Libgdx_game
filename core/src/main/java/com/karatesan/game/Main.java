@@ -9,7 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.karatesan.game.perks.PerkRegistry;
+import com.karatesan.game.data.registry.PerkRegistry;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 /**
@@ -64,7 +64,7 @@ public class Main extends Game {
 
         generator.dispose();
 
-        perkRegistry = new PerkRegistry(Gdx.files.internal("data/perks.json"));
+        perkRegistry = new PerkRegistry(Gdx.files.internal("data/perks2.json"));
 
 
         setScreen(new FirstScreen(this));

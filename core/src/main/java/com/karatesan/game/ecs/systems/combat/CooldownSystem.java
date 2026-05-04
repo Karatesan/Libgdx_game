@@ -16,7 +16,6 @@ public class CooldownSystem extends IteratingSystem {
     @Override
     protected void processEntity(Entity entity, float deltaTime) {
         CooldownComponent cooldown = componentMapper.get(entity);
-        float remainingCooldown = cooldown.remainingCooldown;
-        cooldown.remainingCooldown = Math.max(remainingCooldown - deltaTime, 0f);
+        if (cooldown.remainingCooldown > 0) cooldown.remainingCooldown -= deltaTime;
     }
 }

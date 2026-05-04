@@ -2,11 +2,12 @@ package com.karatesan.game.ecs.systems.movement;
 
 import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
+import com.karatesan.game.config.GameConfig;
 import com.karatesan.game.ecs.components.physics.HitboxComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
-import com.karatesan.game.ecs.systems.core.PausableSystem;
+import com.karatesan.game.ecs.utility.PausableSystem;
 
 public class EnemySeparationSystem extends EntitySystem implements PausableSystem {
 
@@ -15,6 +16,11 @@ public class EnemySeparationSystem extends EntitySystem implements PausableSyste
     private final ComponentMapper<VelocityComponent> vm = ComponentMapper.getFor(VelocityComponent.class);
 
     private ImmutableArray<Entity> enemies;
+    private final GameConfig config;
+
+    public EnemySeparationSystem(GameConfig config) {
+        this.config = config;
+    }
 
     @Override
     public void addedToEngine(Engine engine) {
@@ -28,7 +34,7 @@ public class EnemySeparationSystem extends EntitySystem implements PausableSyste
     public void update(float deltaTime) {
         // The Push Force Multiplier. Tune this!
         // Higher = they bounce away harder. Lower = they squish together more like a fluid.
-        float separationForce = 150f;
+        float separationForce = config.separationForce;
 
         // Optimized Double Loop: N * (N - 1) / 2
         for (int i = 0; i < enemies.size(); i++) {

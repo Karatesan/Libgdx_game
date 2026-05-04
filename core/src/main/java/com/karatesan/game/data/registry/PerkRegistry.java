@@ -1,0 +1,126 @@
+package com.karatesan.game.data.registry;
+
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.FloatArray;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.ObjectMap;
+import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
+import com.karatesan.game.data.perk.PerkDefinition;
+import com.karatesan.game.data.perk.PerkOffer;
+import com.karatesan.game.data.perk.Rarity;
+
+public class PerkRegistry {
+    private final ObjectMap<String, PerkDefinition> perks = new ObjectMap<>();
+    //TODO remove once all perks are working
+    private final Array<String> included = new Array<>(new String[]{
+        "iron_plates"
+        // COMMON
+        /*
+        "surgical_precision", "extended_barrel", "depleted_uranium",
+        "thick_skin", "second_wind", "magnetic_field", "fast_learner",
+        // UNCOMMON
+        "heavy_ordnance", "bullet_hose", "wall_of_lead", "choke_tube",
+        "lucky_strikes", "assassins_mark", "iron_plates", "adrenaline_rush",
+        "supply_runner", "scavenger", "lucky_star",
+        // RARE
+        "bouncing_chaos", "explosive_rounds", "pinball_wizard", "phase_shift",
+        // LEGENDARY
+        "juggernaut"
+
+         */
+    });
+
+    public PerkRegistry(FileHandle file) {
+        Json json = new Json();
+        json.setIgnoreUnknownFields(true);
+
+        PerkDefinition[] definitions = json.fromJson(PerkDefinition[].class, file);
+        for (PerkDefinition def : definitions) {
+            if (included.contains(def.id, false)) perks.put(def.id, def);
+        }
+    }
+
+    public PerkDefinition get(String id) {
+        return perks.get(id);
+    }
+
+    public Array<PerkOffer> generateOffers(PerkInventoryComponent inventory, int count, float luck) {
+        // 1. Build eligible pool with weights
+        Array<PerkDefinition> eligible = new Array<>();
+        FloatArray weights = new FloatArray();
+
+        for (PerkDefinition def : perks.values()) {
+            if (!inventory.isMaxed(def.id, def.maxLevel)) {
+                eligible.add(def);
+                weights.add(getWeight(def.rarity, luck));
+            }
+        }
+
+        // 2. Weighted pick without replacement
+        int pickCount = Math.min(count, eligible.size);
+        Array<PerkOffer> offers = new Array<>(pickCount);
+
+        for (int i = 0; i < pickCount; i++) {
+            int index = pickWeightedRandom(weights);
+
+            PerkDefinition def = eligible.get(index);
+            int nextLevel = inventory.getLevel(def.id) + 1;
+            offers.add(new PerkOffer(def, nextLevel));
+
+            // Remove from pool so it can't be picked again
+            eligible.removeIndex(index);
+            weights.removeIndex(index);
+        }
+
+        return offers;
+    }
+
+    private int pickWeightedRandom(FloatArray weights) {
+        float total = 0;
+        for (int i = 0; i < weights.size; i++) {
+            total += weights.get(i);
+        }
+
+        float roll = MathUtils.random() * total;
+        float cumulative = 0;
+
+        for (int i = 0; i < weights.size; i++) {
+            cumulative += weights.get(i);
+            if (roll <= cumulative) {
+                return i;
+            }
+        }
+
+        return weights.size - 1;
+    }
+
+    private float getWeight(Rarity rarity, float luck) {
+        float base;
+        float luckScale = switch (rarity) {
+            case COMMON -> {
+                base = 28f;
+                yield -0.006f;
+            }
+            case UNCOMMON -> {
+                base = 7f;
+                yield 0.003f;
+            }
+            case RARE -> {
+                base = 6f;
+                yield 0.008f;
+            }
+            case LEGENDARY -> {
+                base = 3f;
+                yield 0.015f;
+            }
+            default -> {
+                base = 7f;
+                yield 0f;
+            }
+        };
+
+        return Math.max(0.1f, base * (1f + luck * luckScale));
+    }
+}

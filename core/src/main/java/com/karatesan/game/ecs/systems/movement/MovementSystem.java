@@ -6,7 +6,7 @@ import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
-import com.karatesan.game.ecs.systems.core.PausableSystem;
+import com.karatesan.game.ecs.utility.PausableSystem;
 
 public class MovementSystem extends IteratingSystem implements PausableSystem {
 

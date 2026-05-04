@@ -4,10 +4,10 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Pool.Poolable;
 
 public class InvincibilityComponent implements Component, Poolable {
-    public float timer = .5f;
+    public float timer;
 
     @Override
     public void reset() {
-        timer = .5f;
+        timer = 0;
     }
 }

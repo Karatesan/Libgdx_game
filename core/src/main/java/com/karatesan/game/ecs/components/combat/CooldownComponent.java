@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.Component;
 import com.badlogic.gdx.utils.Pool;
 
 public class CooldownComponent implements Component, Pool.Poolable {
-
     public float cooldown;
     public float remainingCooldown = 0f;
 

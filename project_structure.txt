@@ -40,6 +40,19 @@
 │   │           └── utils
 │   │               ├── lsans-15.fnt
 │   │               └── lsans-15.png
+│   ├── data
+│   │   ├── blueprints
+│   │   │   ├── enemies
+│   │   │   │   ├── standard.json
+│   │   │   │   ├── swarmer.json
+│   │   │   │   └── tank.json
+│   │   │   ├── player.json
+│   │   │   ├── stats
+│   │   │   └── weapons
+│   │   │       └── basicWeapon.json
+│   │   ├── config.json
+│   │   ├── perks.json
+│   │   └── perks2.json
 │   └── ui
 │       ├── Floor.jpg
 │       ├── Font.ttf
@@ -50,126 +63,8 @@
 │       ├── uiskin.atlas
 │       ├── uiskin.json
 │       └── uiskin.png
-├── build
-│   └── reports
-│       └── problems
-│           └── problems-report.html
 ├── build.gradle
 ├── core
-│   ├── build
-│   │   ├── classes
-│   │   │   └── java
-│   │   │       └── main
-│   │   │           └── com
-│   │   │               └── karatesan
-│   │   │                   └── game
-│   │   │                       ├── FirstScreen$State.class
-│   │   │                       ├── FirstScreen.class
-│   │   │                       ├── Main.class
-│   │   │                       └── ecs
-│   │   │                           ├── components
-│   │   │                           │   ├── combat
-│   │   │                           │   │   ├── BulletComponent.class
-│   │   │                           │   │   ├── DamagePayloadComponent.class
-│   │   │                           │   │   ├── HealthComponent.class
-│   │   │                           │   │   ├── InvincibilityComponent.class
-│   │   │                           │   │   ├── StatsComponent.class
-│   │   │                           │   │   └── WeaponComponent.class
-│   │   │                           │   ├── core
-│   │   │                           │   │   ├── LifeTimeComponent.class
-│   │   │                           │   │   └── SessionComponent.class
-│   │   │                           │   ├── economy
-│   │   │                           │   │   ├── CollectibleComponent.class
-│   │   │                           │   │   ├── MagnetComponent.class
-│   │   │                           │   │   ├── PullableComponent.class
-│   │   │                           │   │   └── XpComponent.class
-│   │   │                           │   ├── event
-│   │   │                           │   │   ├── CollectedEventComponent.class
-│   │   │                           │   │   ├── DeathEventComponent.class
-│   │   │                           │   │   ├── FatalDamageComponent.class
-│   │   │                           │   │   ├── HitEventComponent.class
-│   │   │                           │   │   └── PardonedComponent.class
-│   │   │                           │   ├── perks
-│   │   │                           │   │   └── RicochetPerkComponent.class
-│   │   │                           │   ├── physics
-│   │   │                           │   │   ├── HitboxComponent.class
-│   │   │                           │   │   ├── MovementComponent.class
-│   │   │                           │   │   ├── TransformComponent.class
-│   │   │                           │   │   └── VelocityComponent.class
-│   │   │                           │   ├── render
-│   │   │                           │   │   ├── FloatingTextComponent.class
-│   │   │                           │   │   └── ShapeComponent.class
-│   │   │                           │   └── tag
-│   │   │                           │       ├── DeadComponent.class
-│   │   │                           │       ├── EnemyComponent.class
-│   │   │                           │       └── PlayerComponent.class
-│   │   │                           ├── factory
-│   │   │                           │   ├── EnemyType.class
-│   │   │                           │   ├── EntityFactory$1.class
-│   │   │                           │   └── EntityFactory.class
-│   │   │                           ├── systems
-│   │   │                           │   ├── combat
-│   │   │                           │   │   ├── BulletLifecycleSystem.class
-│   │   │                           │   │   ├── BulletSystem.class
-│   │   │                           │   │   ├── CollisionSystem.class
-│   │   │                           │   │   ├── DeathSystem.class
-│   │   │                           │   │   ├── InvincibilitySystem.class
-│   │   │                           │   │   ├── RicochetPerkSystem.class
-│   │   │                           │   │   └── WeaponSystem.class
-│   │   │                           │   ├── core
-│   │   │                           │   │   ├── CameraSystem.class
-│   │   │                           │   │   ├── CleanupSystem.class
-│   │   │                           │   │   ├── GameStateSystem.class
-│   │   │                           │   │   └── LifeTimeSystem.class
-│   │   │                           │   ├── economy
-│   │   │                           │   │   ├── MagnetSystem.class
-│   │   │                           │   │   ├── PickupSystem.class
-│   │   │                           │   │   └── XpProcessingSystem.class
-│   │   │                           │   ├── movement
-│   │   │                           │   │   ├── EnemySeparationSystem.class
-│   │   │                           │   │   ├── EnemySystem.class
-│   │   │                           │   │   ├── MovementSystem.class
-│   │   │                           │   │   └── PlayerInputSystem.class
-│   │   │                           │   ├── render
-│   │   │                           │   │   ├── RenderSystem$ZComparator.class
-│   │   │                           │   │   ├── RenderSystem.class
-│   │   │                           │   │   └── UISystem.class
-│   │   │                           │   └── waveSystem
-│   │   │                           │       ├── Formation.class
-│   │   │                           │       ├── WaveData.class
-│   │   │                           │       ├── WaveSpawnerSystem$1.class
-│   │   │                           │       └── WaveSpawnerSystem.class
-│   │   │                           └── utility
-│   │   │                               ├── ECSUtils.class
-│   │   │                               └── State.class
-│   │   ├── generated
-│   │   │   └── sources
-│   │   │       ├── annotationProcessor
-│   │   │       │   └── java
-│   │   │       │       └── main
-│   │   │       └── headers
-│   │   │           └── java
-│   │   │               └── main
-│   │   ├── libs
-│   │   │   └── core-1.0.0.jar
-│   │   └── tmp
-│   │       ├── compileJava
-│   │       │   ├── compileTransaction
-│   │       │   │   ├── backup-dir
-│   │       │   │   └── stash-dir
-│   │       │   │       ├── CollisionSystem.class.uniqueId7
-│   │       │   │       ├── DeathSystem.class.uniqueId1
-│   │       │   │       ├── EntityFactory$1.class.uniqueId5
-│   │       │   │       ├── EntityFactory.class.uniqueId9
-│   │       │   │       ├── FirstScreen$State.class.uniqueId6
-│   │       │   │       ├── FirstScreen.class.uniqueId2
-│   │       │   │       ├── GameStateSystem.class.uniqueId0
-│   │       │   │       ├── WaveSpawnerSystem$1.class.uniqueId4
-│   │       │   │       ├── WaveSpawnerSystem.class.uniqueId3
-│   │       │   │       └── WeaponSystem.class.uniqueId8
-│   │       │   └── previous-compilation-data.bin
-│   │       └── jar
-│   │           └── MANIFEST.MF
 │   ├── build.gradle
 │   └── src
 │       └── main
@@ -179,79 +74,139 @@
 │                       └── game
 │                           ├── FirstScreen.java
 │                           ├── Main.java
-│                           └── ecs
-│                               ├── components
-│                               │   ├── combat
-│                               │   │   ├── BulletComponent.java
-│                               │   │   ├── DamagePayloadComponent.java
-│                               │   │   ├── HealthComponent.java
-│                               │   │   ├── InvincibilityComponent.java
-│                               │   │   ├── StatsComponent.java
-│                               │   │   └── WeaponComponent.java
-│                               │   ├── core
-│                               │   │   ├── LifeTimeComponent.java
-│                               │   │   └── SessionComponent.java
-│                               │   ├── economy
-│                               │   │   ├── CollectibleComponent.java
-│                               │   │   ├── MagnetComponent.java
-│                               │   │   ├── PullableComponent.java
-│                               │   │   └── XpComponent.java
-│                               │   ├── event
-│                               │   │   ├── CollectedEventComponent.java
-│                               │   │   ├── DeathEventComponent.java
-│                               │   │   ├── FatalDamageComponent.java
-│                               │   │   ├── HitEventComponent.java
-│                               │   │   └── PardonedComponent.java
-│                               │   ├── perks
-│                               │   │   └── RicochetPerkComponent.java
-│                               │   ├── physics
-│                               │   │   ├── HitboxComponent.java
-│                               │   │   ├── MovementComponent.java
-│                               │   │   ├── TransformComponent.java
-│                               │   │   └── VelocityComponent.java
-│                               │   ├── render
-│                               │   │   ├── FloatingTextComponent.java
-│                               │   │   └── ShapeComponent.java
-│                               │   └── tag
-│                               │       ├── DeadComponent.java
-│                               │       ├── EnemyComponent.java
-│                               │       └── PlayerComponent.java
-│                               ├── factory
-│                               │   ├── EnemyType.java
-│                               │   └── EntityFactory.java
-│                               ├── systems
-│                               │   ├── combat
-│                               │   │   ├── BulletLifecycleSystem.java
-│                               │   │   ├── BulletSystem.java
-│                               │   │   ├── CollisionSystem.java
-│                               │   │   ├── DeathSystem.java
-│                               │   │   ├── InvincibilitySystem.java
-│                               │   │   ├── RicochetPerkSystem.java
-│                               │   │   └── WeaponSystem.java
-│                               │   ├── core
-│                               │   │   ├── CameraSystem.java
-│                               │   │   ├── CleanupSystem.java
-│                               │   │   ├── GameStateSystem.java
-│                               │   │   └── LifeTimeSystem.java
-│                               │   ├── economy
-│                               │   │   ├── MagnetSystem.java
-│                               │   │   ├── PickupSystem.java
-│                               │   │   └── XpProcessingSystem.java
-│                               │   ├── movement
-│                               │   │   ├── EnemySeparationSystem.java
-│                               │   │   ├── EnemySystem.java
-│                               │   │   ├── MovementSystem.java
-│                               │   │   └── PlayerInputSystem.java
-│                               │   ├── render
-│                               │   │   ├── RenderSystem.java
-│                               │   │   └── UISystem.java
-│                               │   └── waveSystem
-│                               │       ├── Formation.java
-│                               │       ├── WaveData.java
-│                               │       └── WaveSpawnerSystem.java
-│                               └── utility
-│                                   ├── ECSUtils.java
-│                                   └── State.java
+│                           ├── config
+│                           │   ├── GameConfig.java
+│                           │   └── GameContext.java
+│                           ├── data
+│                           │   ├── blueprints
+│                           │   │   ├── EnemyBlueprint.java
+│                           │   │   ├── PlayerBlueprint.java
+│                           │   │   └── WeaponBlueprint.java
+│                           │   ├── perk
+│                           │   │   ├── PerkDefinition.java
+│                           │   │   ├── PerkEffect.java
+│                           │   │   ├── PerkEffectType.java
+│                           │   │   ├── PerkLevel.java
+│                           │   │   ├── PerkOffer.java
+│                           │   │   └── Rarity.java
+│                           │   └── registry
+│                           │       ├── BlueprintRegistry.java
+│                           │       └── PerkRegistry.java
+│                           ├── debug
+│                           │   └── DebugDisplay.java
+│                           ├── ecs
+│                           │   ├── Mappers.java
+│                           │   ├── components
+│                           │   │   ├── combat
+│                           │   │   │   ├── BulletComponent.java
+│                           │   │   │   ├── BulletHitEvent.java
+│                           │   │   │   ├── ContactDamageComponent.java
+│                           │   │   │   ├── CooldownComponent.java
+│                           │   │   │   ├── DamagePayloadComponent.java
+│                           │   │   │   ├── InvincibilityComponent.java
+│                           │   │   │   └── ProjectileTemplateComponent.java
+│                           │   │   ├── core
+│                           │   │   │   ├── LifeTimeComponent.java
+│                           │   │   │   └── SessionComponent.java
+│                           │   │   ├── economy
+│                           │   │   │   ├── CollectibleComponent.java
+│                           │   │   │   ├── LevelDataComponent.java
+│                           │   │   │   ├── LootDropComponent.java
+│                           │   │   │   ├── PullableComponent.java
+│                           │   │   │   └── XpComponent.java
+│                           │   │   ├── event
+│                           │   │   │   ├── CollectedEventComponent.java
+│                           │   │   │   ├── DeathEventComponent.java
+│                           │   │   │   ├── FatalDamageComponent.java
+│                           │   │   │   ├── HitEventComponent.java
+│                           │   │   │   ├── LevelUpComponent.java
+│                           │   │   │   ├── PardonedComponent.java
+│                           │   │   │   └── StatsRecalculationFlag.java
+│                           │   │   ├── perks
+│                           │   │   │   ├── BulletStampsComponent.java
+│                           │   │   │   ├── PerkChoiceComponent.java
+│                           │   │   │   ├── PerkInventoryComponent.java
+│                           │   │   │   ├── PierceComponent.java
+│                           │   │   │   ├── PierceMarkerComponent.java
+│                           │   │   │   └── RicochetComponent.java
+│                           │   │   ├── physics
+│                           │   │   │   ├── HitboxComponent.java
+│                           │   │   │   ├── MovementComponent.java
+│                           │   │   │   ├── TransformComponent.java
+│                           │   │   │   └── VelocityComponent.java
+│                           │   │   ├── render
+│                           │   │   │   ├── FloatingTextComponent.java
+│                           │   │   │   └── ShapeComponent.java
+│                           │   │   ├── stats
+│                           │   │   │   ├── DefenseStatsComponent.java
+│                           │   │   │   ├── HealthComponent.java
+│                           │   │   │   ├── OffensiveStatsComponent.java
+│                           │   │   │   ├── ShootingStateComponent.java
+│                           │   │   │   └── UtilityStatsComponent.java
+│                           │   │   ├── tag
+│                           │   │   │   ├── DeadComponent.java
+│                           │   │   │   ├── EnemyComponent.java
+│                           │   │   │   └── PlayerComponent.java
+│                           │   │   └── weapon
+│                           │   │       ├── ProjectileDistanceTravelledComponent.java
+│                           │   │       ├── WeaponComponent.java
+│                           │   │       └── WeaponStateComponent.java
+│                           │   ├── factory
+│                           │   │   ├── EnemyType.java
+│                           │   │   ├── EntityFactory.java
+│                           │   │   └── FloatingTextStyle.java
+│                           │   ├── systems
+│                           │   │   ├── combat
+│                           │   │   │   ├── BulletRangeSystem.java
+│                           │   │   │   ├── CollisionSystem.java
+│                           │   │   │   ├── CooldownSystem.java
+│                           │   │   │   ├── DeathSystem.java
+│                           │   │   │   ├── DefenseSystem.java
+│                           │   │   │   ├── InvincibilitySystem.java
+│                           │   │   │   ├── PostHitBulletSystem.java
+│                           │   │   │   └── WeaponSystem.java
+│                           │   │   ├── core
+│                           │   │   │   ├── CameraSystem.java
+│                           │   │   │   ├── CleanupSystem.java
+│                           │   │   │   ├── GameStateSystem.java
+│                           │   │   │   ├── HitEventProcessingSystem.java
+│                           │   │   │   ├── LifeTimeSystem.java
+│                           │   │   │   └── SessionTimerSystem.java
+│                           │   │   ├── debug
+│                           │   │   │   └── DebugDisplaySystem.java
+│                           │   │   ├── economy
+│                           │   │   │   ├── LevelUpSystem.java
+│                           │   │   │   ├── MagnetSystem.java
+│                           │   │   │   ├── PerkApplicationSystem.java
+│                           │   │   │   ├── PickupSystem.java
+│                           │   │   │   ├── StatRecalculationSystem.java
+│                           │   │   │   └── XpProcessingSystem.java
+│                           │   │   ├── movement
+│                           │   │   │   ├── EnemySeparationSystem.java
+│                           │   │   │   ├── EnemySystem.java
+│                           │   │   │   ├── MovementSystem.java
+│                           │   │   │   └── PlayerInputSystem.java
+│                           │   │   ├── perks
+│                           │   │   │   ├── HpRegenSystem.java
+│                           │   │   │   ├── PiercePerkSystem.java
+│                           │   │   │   └── RicochetPerkSystem.java
+│                           │   │   ├── render
+│                           │   │   │   ├── RenderSystem.java
+│                           │   │   │   └── UISystem.java
+│                           │   │   └── spawning
+│                           │   │       └── WaveSpawnerSystem.java
+│                           │   └── utility
+│                           │       ├── ECSUtils.java
+│                           │       ├── PausableSystem.java
+│                           │       └── State.java
+│                           ├── spawning
+│                           │   └── Formation.java
+│                           ├── ui
+│                           │   ├── HudRenderer.java
+│                           │   ├── LevelUpController.java
+│                           │   ├── LevelUpUIBuilder.java
+│                           │   └── PerkSelectionListener.java
+│                           └── utility
 ├── gradle
 │   ├── gradle-daemon-jvm.properties
 │   └── wrapper
@@ -262,53 +217,6 @@
 ├── gradlew.bat
 ├── local.properties
 ├── lwjgl3
-│   ├── build
-│   │   ├── classes
-│   │   │   └── java
-│   │   │       └── main
-│   │   │           └── com
-│   │   │               └── karatesan
-│   │   │                   └── game
-│   │   │                       └── lwjgl3
-│   │   │                           ├── Lwjgl3Launcher.class
-│   │   │                           └── StartupHelper.class
-│   │   ├── generated
-│   │   │   └── sources
-│   │   │       ├── annotationProcessor
-│   │   │       │   └── java
-│   │   │       │       └── main
-│   │   │       └── headers
-│   │   │           └── java
-│   │   │               └── main
-│   │   ├── resources
-│   │   │   └── main
-│   │   │       ├── assets.txt
-│   │   │       ├── com
-│   │   │       │   └── badlogic
-│   │   │       │       └── gdx
-│   │   │       │           └── utils
-│   │   │       │               ├── lsans-15.fnt
-│   │   │       │               └── lsans-15.png
-│   │   │       ├── libgdx128.png
-│   │   │       ├── libgdx16.png
-│   │   │       ├── libgdx32.png
-│   │   │       ├── libgdx64.png
-│   │   │       └── ui
-│   │   │           ├── Floor.jpg
-│   │   │           ├── Font.ttf
-│   │   │           ├── font-list.fnt
-│   │   │           ├── font-subtitle.fnt
-│   │   │           ├── font-window.fnt
-│   │   │           ├── font.fnt
-│   │   │           ├── uiskin.atlas
-│   │   │           ├── uiskin.json
-│   │   │           └── uiskin.png
-│   │   └── tmp
-│   │       └── compileJava
-│   │           ├── compileTransaction
-│   │           │   ├── backup-dir
-│   │           │   └── stash-dir
-│   │           └── previous-compilation-data.bin
 │   ├── build.gradle
 │   ├── icons
 │   │   ├── logo.icns
@@ -332,4 +240,4 @@
 ├── project_structure.txt
 └── settings.gradle
 
-133 directories, 200 files
+79 directories, 162 files

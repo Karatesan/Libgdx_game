@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool.Poolable;
 
 public class FloatingTextComponent implements Component, Poolable {
     public int damageValue;
+    public String text;
     public Color color;
     public float scale = 1f; // ADD THIS
 
@@ -14,5 +15,6 @@ public class FloatingTextComponent implements Component, Poolable {
         damageValue = 0;
         color = null;
         scale = 1f; // Reset it!
+        text = null;
     }
 }
