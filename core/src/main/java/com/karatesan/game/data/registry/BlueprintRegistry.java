@@ -22,7 +22,6 @@ public class BlueprintRegistry {
 
         // Player
         playerBlueprint = json.fromJson(PlayerBlueprint.class, Gdx.files.internal("data/blueprints/player.json"));
-        System.out.println(playerBlueprint.xpMultiplier);
         // Weapon
         weaponBlueprint = json.fromJson(WeaponBlueprint.class,
             Gdx.files.internal("data/blueprints/weapons/basicWeapon.json"));

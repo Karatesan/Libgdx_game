@@ -7,6 +7,7 @@ public enum FloatingTextStyle {
     CRIT         (Color.ORANGE, 1.25f, 1.0f),
     ARMORED      (Color.GRAY, 0.75f, 0.8f),
     DODGE        (Color.LIGHT_GRAY, 0.75f, 0.8f),
+    EXPLOSION    (Color.BLUE, 0.75f, 0.8f),
     PLAYER_HIT   (Color.RED, 0.75f, 0.8f),
     HEAL         (Color.GREEN, 1.0f, 0.8f);
 

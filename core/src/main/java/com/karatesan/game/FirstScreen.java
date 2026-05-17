@@ -7,14 +7,17 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.karatesan.game.data.registry.BlueprintRegistry;
 import com.karatesan.game.config.GameConfig;
 import com.karatesan.game.config.GameContext;
 import com.karatesan.game.ecs.factory.EntityFactory;
 import com.karatesan.game.ecs.systems.combat.*;
+import com.karatesan.game.ecs.systems.combat.CombatEventFinalizationSystem;
+import com.karatesan.game.ecs.systems.combat.CombatResolutionSystem;
+import com.karatesan.game.ecs.systems.feedback.FloatingCombatTextSystem;
+import com.karatesan.game.ecs.systems.combat.ProjectileAfterHitSystem;
 import com.karatesan.game.ecs.systems.perks.HpRegenSystem;
-import com.karatesan.game.ecs.systems.perks.PiercePerkSystem;
-import com.karatesan.game.ecs.systems.perks.RicochetPerkSystem;
 import com.karatesan.game.ecs.systems.core.*;
 import com.karatesan.game.ecs.systems.debug.DebugDisplaySystem;
 import com.karatesan.game.ecs.systems.economy.*;
@@ -33,11 +36,8 @@ public class FirstScreen implements Screen {
 
     private final Main game;
     private OrthographicCamera camera;
-    private ExtendViewport viewport;
-    private OrthographicCamera uiCamera;
+    private FitViewport viewport;
     private ExtendViewport uiViewport;
-    private EntityFactory entityFactory;
-    private BlueprintRegistry blueprintRegistry;
     private Stage uiStage;
     GameContext context;
     GameConfig config;
@@ -51,30 +51,31 @@ public class FirstScreen implements Screen {
 
     @Override
     public void show() {
+        engine = new PooledEngine();
+
+        config = GameConfig.load();
+
+        context = new GameContext();
+        context.registerListeners(engine);
+
+        BlueprintRegistry blueprintRegistry = new BlueprintRegistry();
+        blueprintRegistry.load();
+
         camera = new OrthographicCamera();
         // Our game world is 800x600 units
-        viewport = new ExtendViewport(800, 600, camera);
+        viewport = new FitViewport(config.viewportWidth, config.viewportHeight, camera);
 
         //UI -------------------------------------------------------
-        uiCamera = new OrthographicCamera();
-        uiViewport = new ExtendViewport(800, 600, uiCamera);
+        OrthographicCamera uiCamera = new OrthographicCamera();
+        uiViewport = new ExtendViewport(config.viewportWidth, config.viewportHeight, uiCamera);
         // ... your existing camera/viewport setup ...
         uiStage = new Stage(uiViewport, game.spriteBatch);
         // CRITICAL: Route input to the UI Stage
         Gdx.input.setInputProcessor(uiStage);
 
         //ECS -----------------------------------------------------
-        engine = new PooledEngine();
 
-        config = GameConfig.defaults();
-
-        context = new GameContext();
-        context.registerListeners(engine);
-
-        blueprintRegistry = new BlueprintRegistry();
-        blueprintRegistry.load();
-
-        entityFactory = new EntityFactory(engine, config, blueprintRegistry);
+        EntityFactory entityFactory = new EntityFactory(engine, config, blueprintRegistry);
 
         entityFactory.createPlayer(config.viewportWidth / 2, config.viewportHeight / 2);
         entityFactory.createSession();
@@ -87,13 +88,14 @@ public class FirstScreen implements Screen {
         engine.addSystem(new EnemySeparationSystem(config));
         engine.addSystem(new MovementSystem());
         engine.addSystem(new BulletRangeSystem());
-        engine.addSystem(new CollisionSystem(context, config));
-        engine.addSystem(new DefenseSystem());
-        engine.addSystem(new HitEventProcessingSystem(entityFactory));
-        engine.addSystem(new PiercePerkSystem());
-        engine.addSystem(new RicochetPerkSystem(config));
-        engine.addSystem(new PostHitBulletSystem());
         engine.addSystem(new CameraSystem(camera, context));
+        engine.addSystem(new WaveSpawnerSystem(entityFactory, context, config, camera));
+        engine.addSystem(new CollisionSystem(context));
+        engine.addSystem(new CombatResolutionSystem(config));
+        engine.addSystem(new ProjectileAfterHitSystem(entityFactory));
+        engine.addSystem(new FloatingCombatTextSystem(entityFactory));
+        engine.addSystem(new PostKillSystem());
+        engine.addSystem(new CombatEventFinalizationSystem());
         engine.addSystem(new MagnetSystem(context, config));
         engine.addSystem(new PickupSystem(context));
         engine.addSystem(new XpProcessingSystem(context));    // priority 5
@@ -105,7 +107,6 @@ public class FirstScreen implements Screen {
         engine.addSystem(new RenderSystem(game.spriteBatch, game.shapeDrawer, game.uiFont, camera, game.floorTexture));
         engine.addSystem(
             new UISystem(game.spriteBatch, game.uiFont, game.shapeDrawer, uiViewport, uiStage, game.perkRegistry));
-        engine.addSystem(new WaveSpawnerSystem(entityFactory, context, config));
         // engine.addSystem(new CooldownSystem());
         engine.addSystem(new DeathSystem(entityFactory, context));
         engine.addSystem(new LifeTimeSystem());

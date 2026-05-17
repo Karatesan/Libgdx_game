@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.*;
 import com.badlogic.ashley.utils.ImmutableArray;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.karatesan.game.ecs.components.combat.BulletComponent;
+import com.karatesan.game.ecs.components.combat.projectile.BulletComponent;
 import com.karatesan.game.config.GameConfig;
 import com.karatesan.game.config.GameContext;
 import com.karatesan.game.ecs.components.event.FatalDamageComponent;
@@ -15,7 +15,7 @@ import com.karatesan.game.ecs.components.event.LevelUpComponent;
 import com.karatesan.game.ecs.components.event.StatsRecalculationFlag;
 import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
-import com.karatesan.game.ecs.components.tag.DeadComponent;
+import com.karatesan.game.ecs.components.tag.PendingRemovalComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.Mappers;
 import com.karatesan.game.ecs.utility.PausableSystem;
@@ -146,7 +146,7 @@ public class GameStateSystem extends EntitySystem {
     private void markForDeath(PooledEngine engine, Family family) {
         ImmutableArray<Entity> entities = engine.getEntitiesFor(family);
         for (int i = 0; i < entities.size(); i++) {
-            entities.get(i).add(engine.createComponent(DeadComponent.class));
+            entities.get(i).add(engine.createComponent(PendingRemovalComponent.class));
         }
     }
 }

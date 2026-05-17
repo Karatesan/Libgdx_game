@@ -15,21 +15,15 @@ public class PerkRegistry {
     private final ObjectMap<String, PerkDefinition> perks = new ObjectMap<>();
     //TODO remove once all perks are working
     private final Array<String> included = new Array<>(new String[]{
-        "iron_plates"
-        // COMMON
-        /*
-        "surgical_precision", "extended_barrel", "depleted_uranium",
-        "thick_skin", "second_wind", "magnetic_field", "fast_learner",
-        // UNCOMMON
-        "heavy_ordnance", "bullet_hose", "wall_of_lead", "choke_tube",
-        "lucky_strikes", "assassins_mark", "iron_plates", "adrenaline_rush",
-        "supply_runner", "scavenger", "lucky_star",
-        // RARE
-        "bouncing_chaos", "explosive_rounds", "pinball_wizard", "phase_shift",
-        // LEGENDARY
-        "juggernaut"
-
-         */
+        "bloodthirst"
+//        // COMMON
+//        "surgical_precision", "extended_barrel", "depleted_uranium", "thick_skin", "second_wind", "magnetic_field", "fast_learner",
+//        // UNCOMMON
+//        "heavy_ordnance", "bullet_hose", "wall_of_lead", "choke_tube", "lucky_strikes", "assassins_mark", "iron_plates", "adrenaline_rush", "supply_runner", "scavenger", "lucky_star",
+//        // RARE
+//        "bouncing_chaos", "explosive_rounds", "pinball_wizard", "phase_shift",
+//        // LEGENDARY
+//        "juggernaut"
     });
 
     public PerkRegistry(FileHandle file) {

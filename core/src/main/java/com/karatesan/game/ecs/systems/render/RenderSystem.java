@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.CharArray;
-import com.karatesan.game.ecs.components.combat.BulletComponent;
+import com.karatesan.game.ecs.components.combat.projectile.BulletComponent;
 import com.karatesan.game.ecs.components.render.FloatingTextComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
 import com.karatesan.game.ecs.components.render.ShapeComponent;
@@ -110,7 +110,6 @@ public class RenderSystem extends SortedIteratingSystem {
 
     private void renderGenericShape(Entity entity, ShapeComponent shape, TransformComponent transform) {
 
-        BulletComponent bullet = bm.get(entity);
         if (bm.has(entity)) {
             // --- RENDER AS HIGH-SPEED TRACER ---
 
@@ -124,7 +123,7 @@ public class RenderSystem extends SortedIteratingSystem {
             //shapeDrawer.line(bullet.startX, bullet.startY, transform.x, transform.y, transform.size / 6f);
 
             // 3. Draw the actual bullet head at the very front
-            shapeDrawer.setColor(Color.WHITE);
+            shapeDrawer.setColor(shape.color);
             shapeDrawer.filledCircle(transform.x, transform.y, transform.size / 2f);
 
         } else {

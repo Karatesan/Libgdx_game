@@ -6,7 +6,7 @@ import com.badlogic.ashley.systems.IteratingSystem;
 import com.karatesan.game.config.GameContext;
 import com.karatesan.game.ecs.components.economy.LootDropComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
-import com.karatesan.game.ecs.components.tag.DeadComponent;
+import com.karatesan.game.ecs.components.tag.PendingRemovalComponent;
 import com.karatesan.game.ecs.components.event.DeathEventComponent;
 import com.karatesan.game.ecs.components.core.SessionComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
@@ -35,12 +35,11 @@ public class DeathSystem extends IteratingSystem implements PausableSystem {
         sessionComponent.kilLCount++;
         // If it's an enemy, drop XP!
         if (Mappers.enemy.has(entity)) {
-            EnemyComponent enemyComp = Mappers.enemy.get(entity);
             LootDropComponent lootDrop = Mappers.lootDrop.get(entity);
             entityFactory.createXpDrop(transform.x, transform.y, lootDrop.xpValue);
         }
 
-        entity.add(getEngine().createComponent(DeadComponent.class));
+        entity.add(getEngine().createComponent(PendingRemovalComponent.class));
         entity.remove(DeathEventComponent.class);
     }
 }

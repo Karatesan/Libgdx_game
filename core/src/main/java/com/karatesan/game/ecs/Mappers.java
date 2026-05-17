@@ -2,18 +2,18 @@ package com.karatesan.game.ecs;
 
 import com.badlogic.ashley.core.ComponentMapper;
 import com.karatesan.game.ecs.components.combat.*;
+import com.karatesan.game.ecs.components.combat.projectile.*;
 import com.karatesan.game.ecs.components.economy.XpComponent;
+import com.karatesan.game.ecs.components.combat.hit.ResolvedHitComponent;
 import com.karatesan.game.ecs.components.stats.*;
-import com.karatesan.game.ecs.components.weapon.ProjectileDistanceTravelledComponent;
 import com.karatesan.game.ecs.components.weapon.WeaponComponent;
 import com.karatesan.game.ecs.components.weapon.WeaponStateComponent;
 import com.karatesan.game.ecs.components.core.SessionComponent;
 import com.karatesan.game.ecs.components.economy.LevelDataComponent;
 import com.karatesan.game.ecs.components.economy.LootDropComponent;
 import com.karatesan.game.ecs.components.event.FatalDamageComponent;
-import com.karatesan.game.ecs.components.event.HitEventComponent;
+import com.karatesan.game.ecs.components.combat.hit.HitEventComponent;
 import com.karatesan.game.ecs.components.event.LevelUpComponent;
-import com.karatesan.game.ecs.components.event.PardonedComponent;
 import com.karatesan.game.ecs.components.event.StatsRecalculationFlag;
 import com.karatesan.game.ecs.components.perks.*;
 import com.karatesan.game.ecs.components.physics.HitboxComponent;
@@ -21,7 +21,7 @@ import com.karatesan.game.ecs.components.physics.MovementComponent;
 import com.karatesan.game.ecs.components.physics.TransformComponent;
 import com.karatesan.game.ecs.components.physics.VelocityComponent;
 import com.karatesan.game.ecs.components.render.ShapeComponent;
-import com.karatesan.game.ecs.components.tag.DeadComponent;
+import com.karatesan.game.ecs.components.tag.PendingRemovalComponent;
 import com.karatesan.game.ecs.components.tag.EnemyComponent;
 import com.karatesan.game.ecs.components.tag.PlayerComponent;
 
@@ -54,6 +54,9 @@ public final class Mappers {
         UtilityStatsComponent.class);
     public static final ComponentMapper<PerkInventoryComponent> perks = ComponentMapper.getFor(
         PerkInventoryComponent.class);
+    public static final ComponentMapper<LifeStealComponent> lifeSteal = ComponentMapper.getFor(
+        LifeStealComponent.class);
+
 
     // ── Weapon ──────────────────────────────────────────
     public static final ComponentMapper<WeaponComponent> weapon = ComponentMapper.getFor(WeaponComponent.class);
@@ -66,10 +69,21 @@ public final class Mappers {
     public static final ComponentMapper<BulletComponent> bullet = ComponentMapper.getFor(BulletComponent.class);
     public static final ComponentMapper<DamagePayloadComponent> damage = ComponentMapper.getFor(
         DamagePayloadComponent.class);
-    public static final ComponentMapper<PierceComponent> pierce = ComponentMapper.getFor(PierceComponent.class);
+    public static final ComponentMapper<PierceStampComponent> pierce = ComponentMapper.getFor(PierceStampComponent.class);
     public static final ComponentMapper<ProjectileDistanceTravelledComponent> distanceTravelled = ComponentMapper.getFor(
         ProjectileDistanceTravelledComponent.class);
-    public static final ComponentMapper<RicochetComponent> ricochet = ComponentMapper.getFor(RicochetComponent.class);
+    public static final ComponentMapper<RicochetStampComponent> ricochet = ComponentMapper.getFor(
+        RicochetStampComponent.class);
+    public static final ComponentMapper<ProjectileHitHistoryComponent> hitHistory = ComponentMapper.getFor(
+        ProjectileHitHistoryComponent.class);
+    public static final ComponentMapper<ExplosionStampComponent> explosionStamp = ComponentMapper.getFor(
+        ExplosionStampComponent.class);
+    public static final ComponentMapper<ExplosionComponent> explosionTag = ComponentMapper.getFor(
+        ExplosionComponent.class);
+    public static final ComponentMapper<PendingRemovalComponent> pendingRemoval = ComponentMapper.getFor(
+        PendingRemovalComponent.class);
+
+
 //    public static final ComponentMapper<ExplosiveComponent> explosive =
 //        ComponentMapper.getFor(ExplosiveComponent.class);
 //    public static final ComponentMapper<KnockbackComponent> knockback =
@@ -87,16 +101,15 @@ public final class Mappers {
     public static final ComponentMapper<LevelUpComponent> levelUp = ComponentMapper.getFor(LevelUpComponent.class);
     public static final ComponentMapper<FatalDamageComponent> fatalDamage = ComponentMapper.getFor(
         FatalDamageComponent.class);
-    public static final ComponentMapper<DeadComponent> dead = ComponentMapper.getFor(DeadComponent.class);
+    public static final ComponentMapper<PendingRemovalComponent> dead = ComponentMapper.getFor(PendingRemovalComponent.class);
     public static final ComponentMapper<InvincibilityComponent> invincibility = ComponentMapper.getFor(
         InvincibilityComponent.class);
-    public static final ComponentMapper<PierceMarkerComponent> pierceMarker = ComponentMapper.getFor(
-        PierceMarkerComponent.class);
-    public static final ComponentMapper<PardonedComponent> pardon = ComponentMapper.getFor(PardonedComponent.class);
     public static final ComponentMapper<StatsRecalculationFlag> recalcFlag = ComponentMapper.getFor(
         StatsRecalculationFlag.class);
     public static final ComponentMapper<PerkChoiceComponent> perkChoice = ComponentMapper.getFor(
         PerkChoiceComponent.class);
+    public static final ComponentMapper<ResolvedHitComponent> resolvedHit =
+        ComponentMapper.getFor(ResolvedHitComponent.class);
 
     // ── XP ───────────────────────────────────────────
     public static final ComponentMapper<XpComponent> xp = ComponentMapper.getFor(XpComponent.class);

@@ -3,13 +3,13 @@ package com.karatesan.game.ecs.systems.core;
 import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.Family;
 import com.badlogic.ashley.systems.IteratingSystem;
-import com.karatesan.game.ecs.components.tag.DeadComponent;
+import com.karatesan.game.ecs.components.tag.PendingRemovalComponent;
 
 public class CleanupSystem extends IteratingSystem {
 
     public CleanupSystem() {
         // Look for ANYTHING that is marked as Dead
-        super(Family.all(DeadComponent.class).get());
+        super(Family.all(PendingRemovalComponent.class).get());
     }
 
     @Override

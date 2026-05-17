@@ -2,7 +2,7 @@ package com.karatesan.game.ecs.systems.combat;
 
 import com.badlogic.ashley.core.*;
 import com.badlogic.gdx.math.MathUtils;
-import com.karatesan.game.ecs.components.combat.ProjectileTemplateComponent;
+import com.karatesan.game.ecs.components.combat.projectile.ProjectileTemplateComponent;
 import com.karatesan.game.ecs.components.weapon.WeaponComponent;
 import com.karatesan.game.ecs.components.weapon.WeaponStateComponent;
 import com.karatesan.game.config.GameContext;
@@ -35,13 +35,13 @@ public class WeaponSystem extends EntitySystem implements PausableSystem {
 
         if (weaponStateComponent.isShooting && weaponStateComponent.shootTimer >= weapon.fireRate) {
             for (int i = 0; i < weapon.projectileCount; i++) {
-                shootAndCreateBullet(stats, weapon, transform, (float) i, bulletData);
+                shootAndCreateBullet(player, stats, weapon, transform, (float) i, bulletData);
             }
             weaponStateComponent.shootTimer = 0;
         }
     }
 
-    private void shootAndCreateBullet(OffensiveStatsComponent stats, WeaponComponent weapon,
+    private void shootAndCreateBullet(Entity owner, OffensiveStatsComponent stats, WeaponComponent weapon,
                                       TransformComponent transform, float i, ProjectileTemplateComponent bulletData) {
         float baseAngleDeg = transform.rotation;
         float angleOffset = 0;
@@ -59,6 +59,6 @@ public class WeaponSystem extends EntitySystem implements PausableSystem {
 
         float finalAngle = baseAngleDeg + angleOffset + drift;
 
-        entityFactory.createBullet(transform, weapon, bulletData, stats, finalAngle);
+        entityFactory.createBullet(owner, transform, weapon, bulletData, stats, finalAngle);
     }
 }

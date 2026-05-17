@@ -77,6 +77,10 @@ public final class DebugDisplay {
         if (enabled) timedEntries.put(key, new TimedEntry(value, seconds));
     }
 
+    public static void logDebug(String key) {
+        if (enabled) timedEntries.put("", new TimedEntry(key, 2f));
+    }
+
     public static void tick(float deltaTime) {
         Iterator<ObjectMap.Entry<String, TimedEntry>> it = timedEntries.iterator();
         while (it.hasNext()) {

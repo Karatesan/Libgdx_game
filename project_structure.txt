@@ -118,10 +118,14 @@
 │                           │   │   │   ├── CollectedEventComponent.java
 │                           │   │   │   ├── DeathEventComponent.java
 │                           │   │   │   ├── FatalDamageComponent.java
-│                           │   │   │   ├── HitEventComponent.java
 │                           │   │   │   ├── LevelUpComponent.java
 │                           │   │   │   ├── PardonedComponent.java
-│                           │   │   │   └── StatsRecalculationFlag.java
+│                           │   │   │   ├── StatsRecalculationFlag.java
+│                           │   │   │   └── hit
+│                           │   │   │       ├── HitEventComponent.java
+│                           │   │   │       ├── HitOutcome.java
+│                           │   │   │       ├── HitSourceType.java
+│                           │   │   │       └── ResolvedHitComponent.java
 │                           │   │   ├── perks
 │                           │   │   │   ├── BulletStampsComponent.java
 │                           │   │   │   ├── PerkChoiceComponent.java
@@ -144,8 +148,8 @@
 │                           │   │   │   ├── ShootingStateComponent.java
 │                           │   │   │   └── UtilityStatsComponent.java
 │                           │   │   ├── tag
-│                           │   │   │   ├── DeadComponent.java
 │                           │   │   │   ├── EnemyComponent.java
+│                           │   │   │   ├── PendingRemovalComponent.java
 │                           │   │   │   └── PlayerComponent.java
 │                           │   │   └── weapon
 │                           │   │       ├── ProjectileDistanceTravelledComponent.java
@@ -161,15 +165,25 @@
 │                           │   │   │   ├── CollisionSystem.java
 │                           │   │   │   ├── CooldownSystem.java
 │                           │   │   │   ├── DeathSystem.java
-│                           │   │   │   ├── DefenseSystem.java
 │                           │   │   │   ├── InvincibilitySystem.java
-│                           │   │   │   ├── PostHitBulletSystem.java
-│                           │   │   │   └── WeaponSystem.java
+│                           │   │   │   ├── WeaponSystem.java
+│                           │   │   │   └── temp
+│                           │   │   │       ├── CombatEventFinalizationSystem.java
+│                           │   │   │       ├── CombatResolutionSystem.java
+│                           │   │   │       ├── FloatingCombatTextSystem.java
+│                           │   │   │       ├── PierceContinuationRule.java
+│                           │   │   │       ├── ProjectileAfterHitSystem.java
+│                           │   │   │       ├── ProjectileContinuationRule.java
+│                           │   │   │       ├── ProjectileHitEffect.java
+│                           │   │   │       ├── ProjectileHitHistoryComponent.java
+│                           │   │   │       ├── ProjectileImpactContext.java
+│                           │   │   │       ├── ProjectileMotionHelper.java
+│                           │   │   │       ├── ProjectileTargetingHelper.java
+│                           │   │   │       └── RicochetContinuationRule.java
 │                           │   │   ├── core
 │                           │   │   │   ├── CameraSystem.java
 │                           │   │   │   ├── CleanupSystem.java
 │                           │   │   │   ├── GameStateSystem.java
-│                           │   │   │   ├── HitEventProcessingSystem.java
 │                           │   │   │   ├── LifeTimeSystem.java
 │                           │   │   │   └── SessionTimerSystem.java
 │                           │   │   ├── debug
@@ -187,9 +201,7 @@
 │                           │   │   │   ├── MovementSystem.java
 │                           │   │   │   └── PlayerInputSystem.java
 │                           │   │   ├── perks
-│                           │   │   │   ├── HpRegenSystem.java
-│                           │   │   │   ├── PiercePerkSystem.java
-│                           │   │   │   └── RicochetPerkSystem.java
+│                           │   │   │   └── HpRegenSystem.java
 │                           │   │   ├── render
 │                           │   │   │   ├── RenderSystem.java
 │                           │   │   │   └── UISystem.java
@@ -240,4 +252,4 @@
 ├── project_structure.txt
 └── settings.gradle
 
-79 directories, 162 files
+81 directories, 172 files

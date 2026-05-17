@@ -11,7 +11,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.karatesan.game.debug.DebugDisplay;
-import com.karatesan.game.ecs.components.combat.BulletComponent;
+import com.karatesan.game.ecs.components.combat.projectile.BulletComponent;
 import com.karatesan.game.ecs.components.stats.HealthComponent;
 import com.karatesan.game.config.GameConfig;
 import com.karatesan.game.config.GameContext;

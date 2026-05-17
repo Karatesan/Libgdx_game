@@ -1,6 +1,6 @@
 package com.karatesan.game.config;
 
-import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Json;
 
@@ -14,12 +14,14 @@ public class GameConfig {
     public float waveChangeTime = 60f;
     public float waveTextDuration = 3f;
     public int maxEnemiesOnScreen = 300;
-    public float spawnRadius = 600f;
+    public float spawnMargin = 120f;
 
     // ── Wave Formations ─────────────────────────────────
     public float arcStepAngle = 15f;
-    public int formationScatterWeight = 70;
-    public int formationArcWeight = 20;
+    public int formationScatterWeight = 50;
+    public int formationArcWeight = 25;
+    public int formationClusterWeight = 20;
+    public float clusterRadius = 45f;
     // Circle weight is implicit: 100 - scatter - arc
 
     // ── Wave Definitions ────────────────────────────────
@@ -54,30 +56,28 @@ public class GameConfig {
 
     private GameConfig() {}
 
-    public static GameConfig load(FileHandle file) {
-        if (file != null && file.exists()) {
-            return new Json().fromJson(GameConfig.class, file);
-        }
-        return new GameConfig();
+    public static GameConfig load() {
+
+        return new Json().fromJson(GameConfig.class, Gdx.files.internal("data/config.json"));
     }
 
     public static GameConfig defaults() {
         GameConfig c = new GameConfig();
-        c.waves.add(new WaveEntry(1.40f, 1, 100,  0,  0, 1.00f));
-        c.waves.add(new WaveEntry(1.20f, 1,  70, 30,  0, 1.00f));
-        c.waves.add(new WaveEntry(1.00f, 2,  55, 40,  5, 1.00f));
-        c.waves.add(new WaveEntry(0.90f, 2,  50, 35, 15, 1.10f));
-        c.waves.add(new WaveEntry(0.75f, 3,  40, 40, 20, 1.15f));
-        c.waves.add(new WaveEntry(0.70f, 3,  35, 45, 20, 1.20f));
-        c.waves.add(new WaveEntry(0.65f, 3,  30, 45, 25, 1.30f));
-        c.waves.add(new WaveEntry(0.55f, 4,  25, 50, 25, 1.40f));
-        c.waves.add(new WaveEntry(0.50f, 4,  25, 45, 30, 1.50f));
-        c.waves.add(new WaveEntry(0.45f, 5,  20, 50, 30, 1.65f));
-        c.waves.add(new WaveEntry(0.40f, 5,  20, 50, 30, 1.80f));
-        c.waves.add(new WaveEntry(0.35f, 6,  15, 50, 35, 2.00f));
-        c.waves.add(new WaveEntry(0.35f, 6,  15, 45, 40, 2.25f));
-        c.waves.add(new WaveEntry(0.35f, 7,  10, 50, 40, 2.50f));
-        c.waves.add(new WaveEntry(0.35f, 7,  10, 50, 40, 2.80f));
+        c.waves.add(new WaveEntry(1.40f, 1, 100, 0, 0, 1.00f));
+        c.waves.add(new WaveEntry(1.20f, 1, 70, 30, 0, 1.00f));
+        c.waves.add(new WaveEntry(1.00f, 2, 55, 40, 5, 1.00f));
+        c.waves.add(new WaveEntry(0.90f, 2, 50, 35, 15, 1.10f));
+        c.waves.add(new WaveEntry(0.75f, 3, 40, 40, 20, 1.15f));
+        c.waves.add(new WaveEntry(0.70f, 3, 35, 45, 20, 1.20f));
+        c.waves.add(new WaveEntry(0.65f, 3, 30, 45, 25, 1.30f));
+        c.waves.add(new WaveEntry(0.55f, 4, 25, 50, 25, 1.40f));
+        c.waves.add(new WaveEntry(0.50f, 4, 25, 45, 30, 1.50f));
+        c.waves.add(new WaveEntry(0.45f, 5, 20, 50, 30, 1.65f));
+        c.waves.add(new WaveEntry(0.40f, 5, 20, 50, 30, 1.80f));
+        c.waves.add(new WaveEntry(0.35f, 6, 15, 50, 35, 2.00f));
+        c.waves.add(new WaveEntry(0.35f, 6, 15, 45, 40, 2.25f));
+        c.waves.add(new WaveEntry(0.35f, 7, 10, 50, 40, 2.50f));
+        c.waves.add(new WaveEntry(0.35f, 7, 10, 50, 40, 2.80f));
         return c;
     }
 
@@ -92,8 +92,7 @@ public class GameConfig {
 
         public WaveEntry() {}
 
-        public WaveEntry(float spawnInterval, int spawnCount,
-                         int standardPct, int swarmerPct, int tankPct,
+        public WaveEntry(float spawnInterval, int spawnCount, int standardPct, int swarmerPct, int tankPct,
                          float hpScale) {
             this.spawnInterval = spawnInterval;
             this.spawnCount = spawnCount;

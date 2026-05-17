@@ -6,6 +6,6 @@
   "projectileCount": 1,
   "spreadAngle": 0,
   "inaccuracy": 5,
-  "projectileSpeed": 850,
+  "projectileSpeed": 700,
   "range": 450
 }

@@ -7,15 +7,14 @@ import com.badlogic.gdx.math.MathUtils;
 import com.karatesan.game.data.blueprints.PlayerBlueprint;
 import com.karatesan.game.data.blueprints.WeaponBlueprint;
 import com.karatesan.game.data.registry.BlueprintRegistry;
+import com.karatesan.game.debug.DebugDisplay;
+import com.karatesan.game.ecs.components.combat.projectile.*;
 import com.karatesan.game.ecs.components.stats.HealthComponent;
-import com.karatesan.game.ecs.components.weapon.ProjectileDistanceTravelledComponent;
 import com.karatesan.game.ecs.components.weapon.WeaponComponent;
 import com.karatesan.game.ecs.components.weapon.WeaponStateComponent;
 import com.karatesan.game.config.GameConfig;
 import com.karatesan.game.ecs.components.economy.*;
 import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
-import com.karatesan.game.ecs.components.perks.PierceComponent;
-import com.karatesan.game.ecs.components.perks.RicochetComponent;
 import com.karatesan.game.ecs.components.render.FloatingTextComponent;
 import com.karatesan.game.ecs.components.combat.*;
 import com.karatesan.game.ecs.components.core.LifeTimeComponent;
@@ -208,14 +207,14 @@ public class EntityFactory {
     }
 
     // --- BULLET SPAWNER ---
-    // Your WeaponSystem will call this method!
-    public void createBullet(TransformComponent playerTransform, WeaponComponent weapon,
+    public void createBullet(Entity owner, TransformComponent playerTransform, WeaponComponent weapon,
                              ProjectileTemplateComponent projectileTemplate, OffensiveStatsComponent stats,
                              float angle) {
+
         Entity bullet = engine.createEntity();
 
-        boolean isCrit = MathUtils.random() <= stats.critChance;
-        float damage = calculateDamage(weapon.minDamage, weapon.maxDamage, stats, isCrit);
+        float rolledDamage = MathUtils.random(weapon.minDamage, weapon.maxDamage);
+        float baseDamage = rolledDamage * stats.damageMultiplier;
 
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.x = playerTransform.x;
@@ -231,115 +230,97 @@ public class EntityFactory {
         velocity.y = MathUtils.sin(angleRad) * weapon.projectileSpeed;
         velocity.speed = weapon.projectileSpeed;
 
-        ShapeComponent shape = engine.createComponent(ShapeComponent.class);
-        shape.color = isCrit ? Color.RED : Color.LIGHT_GRAY; // Make crits look cool!
-
         BulletComponent bulletTag = engine.createComponent(BulletComponent.class);
         bulletTag.range = weapon.range;
-        // ADD THESE: Anchor the trail to the spawn position
         bulletTag.startX = playerTransform.x;
         bulletTag.startY = playerTransform.y;
 
-        //Perks
+        DamagePayloadComponent payload = engine.createComponent(DamagePayloadComponent.class);
+        payload.owner = owner;
+        payload.baseDamage = baseDamage;
+        payload.currentDamage = baseDamage;
+        payload.critChance = stats.critChance;
+        payload.critMultiplier = stats.critMultiplier;
 
-        if (projectileTemplate.ricochetChance > 0) {
-            RicochetComponent ricochet = engine.createComponent(RicochetComponent.class);
-            ricochet.ricochetCount = projectileTemplate.ricochetCount;
-            ricochet.ricochetChance = projectileTemplate.ricochetChance;
-            ricochet.ricochetDamageRetention = projectileTemplate.ricochetDamageRetention;
+        if (projectileTemplate.ricochetChance > 0f && projectileTemplate.ricochetCount > 0) {
+            RicochetStampComponent ricochet = engine.createComponent(RicochetStampComponent.class);
+            ricochet.remaining = projectileTemplate.ricochetCount;
+            ricochet.chance = projectileTemplate.ricochetChance;
+            ricochet.damageRetention = projectileTemplate.ricochetDamageRetention;
             bullet.add(ricochet);
         }
+
         if (projectileTemplate.pierceCount > 0) {
-            PierceComponent pierce = engine.createComponent(PierceComponent.class);
-            pierce.pierceCount = projectileTemplate.pierceCount;
-            pierce.pierceDamageRetention = projectileTemplate.pierceDamageRetention;
+            PierceStampComponent pierce = engine.createComponent(PierceStampComponent.class);
+            pierce.remaining = projectileTemplate.pierceCount;
+            pierce.damageRetention = projectileTemplate.pierceDamageRetention;
             bullet.add(pierce);
         }
 
-        ProjectileDistanceTravelledComponent distanceTravelled = engine.createComponent(
-            ProjectileDistanceTravelledComponent.class);
-
-        DamagePayloadComponent payload = engine.createComponent(DamagePayloadComponent.class);
-        payload.damage = damage;
-        payload.isCrit = isCrit;
+        if (projectileTemplate.explosionChance > 0) {
+            ExplosionStampComponent ex = engine.createComponent(ExplosionStampComponent.class);
+            ex.explosionDamageRatio = config.explosionDamageRatio;
+            ex.explosionRadius = config.explosionRadius;
+            ex.explosionChance = projectileTemplate.explosionChance;
+            bullet.add(ex);
+        }
 
         HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
         hitbox.radius = config.bulletSize;
 
         bullet.add(transform);
         bullet.add(velocity);
-        bullet.add(shape);
+        bullet.add(engine.createComponent(ShapeComponent.class));
         bullet.add(bulletTag);
         bullet.add(payload);
         bullet.add(hitbox);
-        bullet.add(distanceTravelled);
-
+        bullet.add(engine.createComponent(ProjectileDistanceTravelledComponent.class));
+        bullet.add(engine.createComponent(ProjectileHitHistoryComponent.class));
         engine.addEntity(bullet);
     }
 
-    private float calculateDamage(float minDamage, float maxDamage, OffensiveStatsComponent stats, boolean isCrit) {
-        float damage = MathUtils.random(minDamage, maxDamage);
-        damage *= stats.damageMultiplier;
-        if (isCrit) {
-            damage *= stats.critMultiplier;
-        }
-        return damage;
-    }
-
-
-    public void createBullet(float x, float y, float angleRad, float speed, float damage, float range, boolean isCrit) {
-        Entity bullet = engine.createEntity();
+    public void createExplosion(float x, float y, float damage, Entity owner, float critChance, float critMultiplier) {
+        Entity explosion = engine.createEntity();
+        LifeTimeComponent lifetime = engine.createComponent(LifeTimeComponent.class);
 
         TransformComponent transform = engine.createComponent(TransformComponent.class);
         transform.x = x;
         transform.y = y;
         transform.z = 2;
-        transform.size = 4;
-        transform.rotation = angleRad * MathUtils.radiansToDegrees;
-
-        VelocityComponent velocity = engine.createComponent(VelocityComponent.class);
-        velocity.x = MathUtils.cos(angleRad) * speed;
-        velocity.y = MathUtils.sin(angleRad) * speed;
-        velocity.speed = speed;
-
-        ShapeComponent shape = engine.createComponent(ShapeComponent.class);
-        shape.color = isCrit ? Color.RED : Color.LIGHT_GRAY; // Make crits look cool!
-
-        BulletComponent bulletData = engine.createComponent(BulletComponent.class);
-        bulletData.range = range;
-        // ADD THESE: Anchor the trail to the spawn position
-        bulletData.startX = x;
-        bulletData.startY = y;
-
-        DamagePayloadComponent payload = engine.createComponent(DamagePayloadComponent.class);
-        payload.damage = damage;
-        payload.isCrit = isCrit;
+        transform.size = config.explosionRadius;
+        transform.rotation = 0;
 
         HitboxComponent hitbox = engine.createComponent(HitboxComponent.class);
-        hitbox.radius = 4;
+        hitbox.radius = config.explosionRadius;
 
-        PierceComponent pierceComponent = engine.createComponent(PierceComponent.class);
+        lifetime.timer = 1;
+        lifetime.maxTime = 1;
 
-        bullet.add(transform);
-        bullet.add(velocity);
-        bullet.add(shape);
-        bullet.add(bulletData);
-        bullet.add(payload);
-        bullet.add(hitbox);
-        bullet.add(pierceComponent);
+        DamagePayloadComponent payload = engine.createComponent(DamagePayloadComponent.class);
+        payload.owner = owner;
+        payload.baseDamage = damage;
+        payload.currentDamage = damage;
+        payload.critChance = critChance;
+        payload.critMultiplier = critMultiplier;
 
-        engine.addEntity(bullet);
+        ExplosionComponent explosionComponent = engine.createComponent(ExplosionComponent.class);
+
+        ShapeComponent shape = engine.createComponent(ShapeComponent.class);
+        shape.color = Color.ORANGE;
+        shape.color.a = 0.8f;
+
+        explosion.add(payload).add(lifetime).add(transform).add(shape).add(hitbox).add(explosionComponent);
+        engine.addEntity(explosion);
     }
 
-    public Entity createSession() {
+    public void createSession() {
         Entity sessionEntity = engine.createEntity();
         SessionComponent sessionData = engine.createComponent(SessionComponent.class);
         sessionEntity.add(sessionData);
         engine.addEntity(sessionEntity);
-        return sessionEntity;
     }
 
-    public void createDamageText(Entity enemy, float damage, FloatingTextStyle floatingTextStyle) {
+    public void createDamageText(float x, float y, float damage, FloatingTextStyle floatingTextStyle) {
         Entity text = engine.createEntity();
 
         // 1. Setup Lifetime
@@ -355,23 +336,20 @@ public class EntityFactory {
             txt.scale = FloatingTextStyle.CRIT.scale;
             lifetime.timer = FloatingTextStyle.CRIT.lifetime;
             lifetime.maxTime = FloatingTextStyle.CRIT.lifetime;
-        }
-        else if (floatingTextStyle == FloatingTextStyle.ARMORED) {
+        } else if (floatingTextStyle == FloatingTextStyle.ARMORED) {
             txt.scale = FloatingTextStyle.ARMORED.scale;
             lifetime.timer = FloatingTextStyle.ARMORED.lifetime;
-            lifetime.maxTime =FloatingTextStyle.ARMORED.lifetime;
-        }
-        else {
+            lifetime.maxTime = FloatingTextStyle.ARMORED.lifetime;
+        } else {
             txt.scale = FloatingTextStyle.DAMAGE.scale;
             lifetime.timer = FloatingTextStyle.DAMAGE.lifetime;
             lifetime.maxTime = FloatingTextStyle.DAMAGE.lifetime;
         }
 
         // 3. Setup Position (Copy enemy's current position)
-        TransformComponent enemyPos = enemy.getComponent(TransformComponent.class);
         TransformComponent transform = engine.createComponent(TransformComponent.class);
-        transform.x = enemyPos.x + OFFSET_X[textOffsetIndex];
-        transform.y = enemyPos.y + OFFSET_Y[textOffsetIndex];
+        transform.x = x + OFFSET_X[textOffsetIndex];
+        transform.y = y + OFFSET_Y[textOffsetIndex];
         transform.z = 3;
 
         // 4. Setup "Fountain" Velocity (Jitter)
@@ -393,7 +371,7 @@ public class EntityFactory {
         engine.addEntity(text);
     }
 
-    public void createFloatingText(Entity enemy, String text, FloatingTextStyle type) {
+    public void createFloatingText(float x, float y, String text, FloatingTextStyle type) {
         Entity textEntity = engine.createEntity();
 
         // 1. Setup Lifetime
@@ -407,10 +385,9 @@ public class EntityFactory {
         floatingTextComponent.text = text;
 
         // 3. Setup Position (Copy enemy's current position)
-        TransformComponent enemyPos = enemy.getComponent(TransformComponent.class);
         TransformComponent transform = engine.createComponent(TransformComponent.class);
-        transform.x = enemyPos.x + OFFSET_X[textOffsetIndex];
-        transform.y = enemyPos.y + OFFSET_Y[textOffsetIndex];
+        transform.x = x + OFFSET_X[textOffsetIndex];
+        transform.y = y + OFFSET_Y[textOffsetIndex];
         transform.z = 3;
 
         // 4. Setup "Fountain" Velocity (Jitter)

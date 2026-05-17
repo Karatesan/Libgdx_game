@@ -10,8 +10,9 @@ import com.karatesan.game.data.blueprints.WeaponBlueprint;
 import com.karatesan.game.data.registry.BlueprintRegistry;
 import com.karatesan.game.data.registry.PerkRegistry;
 import com.karatesan.game.debug.DebugDisplay;
+import com.karatesan.game.ecs.components.perks.LifeStealComponent;
 import com.karatesan.game.ecs.components.stats.HealthComponent;
-import com.karatesan.game.ecs.components.combat.ProjectileTemplateComponent;
+import com.karatesan.game.ecs.components.combat.projectile.ProjectileTemplateComponent;
 import com.karatesan.game.ecs.components.weapon.WeaponComponent;
 import com.karatesan.game.config.GameConfig;
 import com.karatesan.game.config.GameContext;
@@ -36,12 +37,14 @@ public class StatRecalculationSystem extends EntitySystem {
 
     private final ObjectMap<String, Float> statDeltas = new ObjectMap<>();
     private final ObjectMap<String, Float> traitDeltas = new ObjectMap<>();
+    private final ObjectMap<String, Float> onKillDeltas = new ObjectMap<>();
+
 
     private static final float DELTA_DISPLAY_SECONDS = 10f;
     private final StringBuilder deltaSb = new StringBuilder(48);
 
     //FOR DEBUG
-    private static final int SNAPSHOT_SIZE = 22;
+    private static final int SNAPSHOT_SIZE = 25;
     private final float[] snapshot = new float[SNAPSHOT_SIZE];
 
     public StatRecalculationSystem(GameContext context, GameConfig config, BlueprintRegistry blueprints,
@@ -72,6 +75,7 @@ public class StatRecalculationSystem extends EntitySystem {
         MovementComponent mov = Mappers.movement.get(player);
         ProjectileTemplateComponent tmpl = Mappers.template.get(player);
         HealthComponent hp = Mappers.health.get(player);
+        LifeStealComponent lifeSteal = Mappers.lifeSteal.get(player);
 
         // ── 0b. Snapshot current values if debug overlay is on ──
 
@@ -105,6 +109,8 @@ public class StatRecalculationSystem extends EntitySystem {
                         statDeltas.put(effect.target, statDeltas.get(effect.target, 0f) + effect.value);
                     } else if (effect.type == PerkEffectType.TRAIT_ADDITION) {
                         traitDeltas.put(effect.target, traitDeltas.get(effect.target, 0f) + effect.value);
+                    } else if (effect.type == PerkEffectType.ON_KILL_EFFECT) {
+                        onKillDeltas.put(effect.target, traitDeltas.get(effect.target, 0f) + effect.value);
                     }
                 }
             }
@@ -132,7 +138,7 @@ public class StatRecalculationSystem extends EntitySystem {
         // ── 6. Write defensive stats ────────────────────────────
 
         def.armor = pb.armor + d("armor");
-        def.dodgeChance = MathUtils.clamp(pb.dodgeChance + d("dodgeChance"), 0f, 0.5f);
+        def.dodgeChance = MathUtils.clamp(pb.dodgeChance + d("dodgeChance"), 0f, 1f);
 
         // ── 7. Write utility stats ──────────────────────────────
 
@@ -142,7 +148,7 @@ public class StatRecalculationSystem extends EntitySystem {
 
         // ── 8. Write movement ───────────────────────────────────
 
-        mov.maxSpeed = pb.moveSpeed * (1.0f +  d("moveSpeed"));
+        mov.maxSpeed = pb.moveSpeed * (1.0f + d("moveSpeed"));
 
         // ── 9. Write projectile template ────────────────────────
 
@@ -151,6 +157,7 @@ public class StatRecalculationSystem extends EntitySystem {
         tmpl.ricochetChance = t("RICOCHET_CHANCE");
         tmpl.ricochetCount = (int) t("RICOCHET_COUNT");
         tmpl.ricochetDamageRetention = config.ricochetBaseRetention + d("ricochetDamageRetention");
+        tmpl.explosionChance = t("EXPLOSION_CHANCE");
         tmpl.explosionRadius = config.explosionRadius;
         tmpl.explosionDamageRatio = config.explosionDamageRatio;
         tmpl.knockbackForce = d("knockbackForce");
@@ -164,8 +171,24 @@ public class StatRecalculationSystem extends EntitySystem {
             hp.currentHp = hp.currentHp * (newMax / prevMax);
         }
 
-        //hp regen
+        // ── 11. Write health regen  ─────────────────────
         hp.hpRegen = pb.hpRegen + d("hpRegen");
+        hp.hpRegenMultiplier = pb.hpRegenMultiplier + d("hpRegenMultiplier");
+
+        // ── 12. Write life steal ─────────────────────
+        if(lifeSteal != null){
+            lifeSteal.flatHpPerKill = pb.flatHpPerKill + k("flatHpPerKill");
+            lifeSteal.flatHpPerHit = pb.flatHpPerHit + k("flatHpPerHit");
+            lifeSteal.percentageOfDamageDealtHeal = pb.percentageOfDamageDealtHeal + k("percentageOfDamageDealtHeal");
+        } else{
+            if(k("flatHpPerKill") != 0f || k("flatHpPerKill") != 0 || k("flatHpPerKill") != 0){
+                lifeSteal = getEngine().createComponent(LifeStealComponent.class);
+                lifeSteal.flatHpPerKill = pb.flatHpPerKill + k("flatHpPerKill");
+                lifeSteal.flatHpPerHit = pb.flatHpPerHit + k("flatHpPerHit");
+                lifeSteal.percentageOfDamageDealtHeal = pb.percentageOfDamageDealtHeal + k("percentageOfDamageDealtHeal");
+                player.add(lifeSteal);
+            }
+        }
 
         //FOR DEBUG
         if (logging) logDeltas(wpn, off, def, util, mov, tmpl, hp);
@@ -209,6 +232,9 @@ public class StatRecalculationSystem extends EntitySystem {
 
     private float t(String key) {return traitDeltas.get(key, 0f);}
 
+    private float k(String key) {return onKillDeltas.get(key, 0f);}
+
+
     //FOR DEBUG
 
     private void snapshotStats(WeaponComponent wpn, OffensiveStatsComponent off, DefenseStatsComponent def,
@@ -235,8 +261,12 @@ public class StatRecalculationSystem extends EntitySystem {
         snapshot[i++] = tmpl.ricochetChance;
         snapshot[i++] = tmpl.ricochetCount;
         snapshot[i++] = tmpl.ricochetDamageRetention;
+        snapshot[i++] = tmpl.explosionChance;
         snapshot[i++] = tmpl.knockbackForce;
-        snapshot[i] = hp.maxHp;
+        snapshot[i++] = hp.maxHp;
+        snapshot[i++] = hp.hpRegenMultiplier;
+        snapshot[i] = hp.hpRegen;
+
     }
 
     private void logDeltas(WeaponComponent wpn, OffensiveStatsComponent off, DefenseStatsComponent def,
@@ -263,7 +293,10 @@ public class StatRecalculationSystem extends EntitySystem {
         logDelta("ricoChance", snapshot[i++], tmpl.ricochetChance);
         logDelta("ricoCount", (int) snapshot[i++], tmpl.ricochetCount);
         logDelta("ricoRetention", snapshot[i++], tmpl.ricochetDamageRetention);
+        logDelta("explosionChance", snapshot[i++], tmpl.explosionChance);
         logDelta("knockback", snapshot[i++], tmpl.knockbackForce);
-        logDelta("maxHp", snapshot[i], hp.maxHp);
+        logDelta("maxHp", snapshot[i++], hp.maxHp);
+        logDelta("hpRegenMultiplier", snapshot[i], hp.hpRegenMultiplier);
+        logDelta("hpRegen", snapshot[i] * snapshot[++i], hp.hpRegenMultiplier * hp.hpRegen);
     }
 }
