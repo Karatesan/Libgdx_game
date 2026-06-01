@@ -1,7 +1,7 @@
 {
   "size": 30,
   "maxHp": 100,
-  "hpRegen": 10,
+  "hpRegen": 0,
   "hpRegenMultiplier": 1,
   "moveSpeed": 200,
   "critChance": 0.05,

@@ -947,7 +947,7 @@
           {
             "type": "ON_KILL_EFFECT",
             "target": "flatHpPerKill",
-            "value": 7
+            "value": 4
           },
           {
             "type": "STAT_MODIFIER",
@@ -963,7 +963,7 @@
           {
             "type": "ON_KILL_EFFECT",
             "target": "flatHpPerKill",
-            "value": 12
+            "value": 5
           },
           {
             "type": "STAT_MODIFIER",
@@ -1055,11 +1055,11 @@
             "buffs": [
               {
                 "target": "damageMultiplier",
-                "value": 0.55
+                "value": 0.25
               },
               {
                 "target": "moveSpeedMultiplier",
-                "value": 0.25
+                "value": 0.1
               },
               {
                 "target": "critChance",
@@ -1080,15 +1080,15 @@
             "buffs": [
               {
                 "target": "damageMultiplier",
-                "value": 0.80
+                "value": 0.25
               },
               {
                 "target": "moveSpeedMultiplier",
-                "value": 0.35
+                "value": 0.1
               },
               {
                 "target": "critChance",
-                "value": 0.20
+                "value": 0.1
               },
               {
                 "target": "projectileCount",
@@ -1974,7 +1974,7 @@
         "levelUpDescription": "Bullets leave a damaging trail (0.5s, 20% weapon DPS).",
         "effects": [
           {
-            "type": "TRAIT_ADDITION",
+            "type": "BULLET_TRAIL",
             "target": "BULLET_TRAIL",
             "trailDuration": 0.5,
             "trailDamagePercent": 0.20,
@@ -1987,7 +1987,7 @@
         "levelUpDescription": "Trail lasts 0.8s, deals 30% weapon DPS.",
         "effects": [
           {
-            "type": "TRAIT_ADDITION",
+            "type": "BULLET_TRAIL",
             "target": "BULLET_TRAIL",
             "trailDuration": 0.8,
             "trailDamagePercent": 0.30,
@@ -2000,7 +2000,7 @@
         "levelUpDescription": "Trail lasts 1.2s, deals 40% weapon DPS. Slows enemies 20%.",
         "effects": [
           {
-            "type": "TRAIT_ADDITION",
+            "type": "BULLET_TRAIL",
             "target": "BULLET_TRAIL",
             "trailDuration": 1.2,
             "trailDamagePercent": 0.40,

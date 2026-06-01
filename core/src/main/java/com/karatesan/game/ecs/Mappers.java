@@ -56,6 +56,8 @@ public final class Mappers {
         PerkInventoryComponent.class);
     public static final ComponentMapper<LifeStealComponent> lifeSteal = ComponentMapper.getFor(
         LifeStealComponent.class);
+    public static final ComponentMapper<LastStandComponent> lastStand = ComponentMapper.getFor(
+        LastStandComponent.class);
 
 
     // ── Weapon ──────────────────────────────────────────

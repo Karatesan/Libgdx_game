@@ -49,6 +49,7 @@ public class PerkApplicationSystem extends EntitySystem {
         }
         // Record in inventory
         inventory.acquiredPerks.put(choice.perkId, nextLevel);
+        registry.applyPerk(player, choice.perkId, nextLevel, getEngine());
 
         // Flag for stat rebuild — StatRecalculationSystem handles the math
         if (!Mappers.recalcFlag.has(player)) {

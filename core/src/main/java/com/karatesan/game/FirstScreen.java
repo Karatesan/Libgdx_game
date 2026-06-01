@@ -11,12 +11,14 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.karatesan.game.data.registry.BlueprintRegistry;
 import com.karatesan.game.config.GameConfig;
 import com.karatesan.game.config.GameContext;
+import com.karatesan.game.data.registry.PerkRegistry;
 import com.karatesan.game.ecs.factory.EntityFactory;
 import com.karatesan.game.ecs.systems.combat.*;
 import com.karatesan.game.ecs.systems.combat.CombatEventFinalizationSystem;
 import com.karatesan.game.ecs.systems.combat.CombatResolutionSystem;
 import com.karatesan.game.ecs.systems.feedback.FloatingCombatTextSystem;
 import com.karatesan.game.ecs.systems.combat.ProjectileAfterHitSystem;
+import com.karatesan.game.ecs.systems.perks.ConditionalBuffSystem;
 import com.karatesan.game.ecs.systems.perks.HpRegenSystem;
 import com.karatesan.game.ecs.systems.core.*;
 import com.karatesan.game.ecs.systems.debug.DebugDisplaySystem;
@@ -41,6 +43,8 @@ public class FirstScreen implements Screen {
     private Stage uiStage;
     GameContext context;
     GameConfig config;
+    PerkRegistry perkRegistry;
+
 
     // The heart of our new architecture
     private PooledEngine engine;
@@ -60,6 +64,8 @@ public class FirstScreen implements Screen {
 
         BlueprintRegistry blueprintRegistry = new BlueprintRegistry();
         blueprintRegistry.load();
+
+        perkRegistry = new PerkRegistry(Gdx.files.internal("data/perks2.json"), blueprintRegistry);
 
         camera = new OrthographicCamera();
         // Our game world is 800x600 units
@@ -94,21 +100,22 @@ public class FirstScreen implements Screen {
         engine.addSystem(new CombatResolutionSystem(config));
         engine.addSystem(new ProjectileAfterHitSystem(entityFactory));
         engine.addSystem(new FloatingCombatTextSystem(entityFactory));
-        engine.addSystem(new PostKillSystem());
+        engine.addSystem(new OnKillSystem());
         engine.addSystem(new CombatEventFinalizationSystem());
+        engine.addSystem(new ConditionalBuffSystem());
         engine.addSystem(new MagnetSystem(context, config));
         engine.addSystem(new PickupSystem(context));
         engine.addSystem(new XpProcessingSystem(context));    // priority 5
         engine.addSystem(new LevelUpSystem(context, config));
         engine.addSystem(new GameStateSystem(context, config));                          // 0
-        engine.addSystem(new PerkApplicationSystem(game.perkRegistry, context));              // 1
-        engine.addSystem(new StatRecalculationSystem(context, config, blueprintRegistry, game.perkRegistry));
+        engine.addSystem(new PerkApplicationSystem(perkRegistry, context));              // 1
+        engine.addSystem(new StatRecalculationSystem(context, config, blueprintRegistry, perkRegistry));
         engine.addSystem(new SessionTimerSystem(config, context));
         engine.addSystem(new RenderSystem(game.spriteBatch, game.shapeDrawer, game.uiFont, camera, game.floorTexture));
         engine.addSystem(
-            new UISystem(game.spriteBatch, game.uiFont, game.shapeDrawer, uiViewport, uiStage, game.perkRegistry));
+            new UISystem(game.spriteBatch, game.uiFont, game.shapeDrawer, uiViewport, uiStage, perkRegistry));
         // engine.addSystem(new CooldownSystem());
-        engine.addSystem(new DeathSystem(entityFactory, context));
+        engine.addSystem(new OnDeathSystem(entityFactory, context));
         engine.addSystem(new LifeTimeSystem());
         engine.addSystem(new CleanupSystem());
         engine.addSystem(new DebugDisplaySystem(game.spriteBatch, context, config));

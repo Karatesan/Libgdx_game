@@ -5,30 +5,31 @@ import com.badlogic.ashley.core.Entity;
 import com.badlogic.ashley.core.EntitySystem;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.ObjectMap;
-import com.karatesan.game.data.blueprints.PlayerBlueprint;
-import com.karatesan.game.data.blueprints.WeaponBlueprint;
-import com.karatesan.game.data.registry.BlueprintRegistry;
-import com.karatesan.game.data.registry.PerkRegistry;
-import com.karatesan.game.debug.DebugDisplay;
-import com.karatesan.game.ecs.components.perks.LifeStealComponent;
-import com.karatesan.game.ecs.components.stats.HealthComponent;
-import com.karatesan.game.ecs.components.combat.projectile.ProjectileTemplateComponent;
-import com.karatesan.game.ecs.components.weapon.WeaponComponent;
 import com.karatesan.game.config.GameConfig;
 import com.karatesan.game.config.GameContext;
-import com.karatesan.game.ecs.components.event.StatsRecalculationFlag;
-import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
-import com.karatesan.game.ecs.components.physics.MovementComponent;
-import com.karatesan.game.ecs.components.stats.DefenseStatsComponent;
-import com.karatesan.game.ecs.components.stats.OffensiveStatsComponent;
-import com.karatesan.game.ecs.components.stats.UtilityStatsComponent;
-import com.karatesan.game.ecs.Mappers;
+import com.karatesan.game.data.blueprints.PlayerBlueprint;
+import com.karatesan.game.data.blueprints.WeaponBlueprint;
 import com.karatesan.game.data.perk.PerkDefinition;
 import com.karatesan.game.data.perk.PerkEffect;
 import com.karatesan.game.data.perk.PerkEffectType;
 import com.karatesan.game.data.perk.PerkLevel;
+import com.karatesan.game.data.registry.BlueprintRegistry;
+import com.karatesan.game.data.registry.PerkRegistry;
+import com.karatesan.game.debug.DebugDisplay;
+import com.karatesan.game.ecs.Mappers;
+import com.karatesan.game.ecs.components.combat.projectile.ProjectileTemplateComponent;
+import com.karatesan.game.ecs.components.event.StatsRecalculationFlag;
+import com.karatesan.game.ecs.components.perks.LastStandComponent;
+import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
+import com.karatesan.game.ecs.components.physics.MovementComponent;
+import com.karatesan.game.ecs.components.stats.DefenseStatsComponent;
+import com.karatesan.game.ecs.components.stats.HealthComponent;
+import com.karatesan.game.ecs.components.stats.OffensiveStatsComponent;
+import com.karatesan.game.ecs.components.stats.UtilityStatsComponent;
+import com.karatesan.game.ecs.components.weapon.WeaponComponent;
 
 public class StatRecalculationSystem extends EntitySystem {
+
 
     private final GameContext context;
     private final GameConfig config;
@@ -37,8 +38,6 @@ public class StatRecalculationSystem extends EntitySystem {
 
     private final ObjectMap<String, Float> statDeltas = new ObjectMap<>();
     private final ObjectMap<String, Float> traitDeltas = new ObjectMap<>();
-    private final ObjectMap<String, Float> onKillDeltas = new ObjectMap<>();
-
 
     private static final float DELTA_DISPLAY_SECONDS = 10f;
     private final StringBuilder deltaSb = new StringBuilder(48);
@@ -75,8 +74,7 @@ public class StatRecalculationSystem extends EntitySystem {
         MovementComponent mov = Mappers.movement.get(player);
         ProjectileTemplateComponent tmpl = Mappers.template.get(player);
         HealthComponent hp = Mappers.health.get(player);
-        LifeStealComponent lifeSteal = Mappers.lifeSteal.get(player);
-
+        LastStandComponent lastStand = Mappers.lastStand.get(player);
         // ── 0b. Snapshot current values if debug overlay is on ──
 
         boolean logging = DebugDisplay.isEnabled();
@@ -104,13 +102,11 @@ public class StatRecalculationSystem extends EntitySystem {
                 PerkLevel levelData = perkDef.getLevel(lvl);
                 if (levelData == null) continue;
 
-                for (PerkEffect effect : levelData.effects) {
+                for (PerkEffect effect : levelData.statEffects) {
                     if (effect.type == PerkEffectType.STAT_MODIFIER) {
                         statDeltas.put(effect.target, statDeltas.get(effect.target, 0f) + effect.value);
                     } else if (effect.type == PerkEffectType.TRAIT_ADDITION) {
                         traitDeltas.put(effect.target, traitDeltas.get(effect.target, 0f) + effect.value);
-                    } else if (effect.type == PerkEffectType.ON_KILL_EFFECT) {
-                        onKillDeltas.put(effect.target, traitDeltas.get(effect.target, 0f) + effect.value);
                     }
                 }
             }
@@ -175,19 +171,14 @@ public class StatRecalculationSystem extends EntitySystem {
         hp.hpRegen = pb.hpRegen + d("hpRegen");
         hp.hpRegenMultiplier = pb.hpRegenMultiplier + d("hpRegenMultiplier");
 
-        // ── 12. Write life steal ─────────────────────
-        if(lifeSteal != null){
-            lifeSteal.flatHpPerKill = pb.flatHpPerKill + k("flatHpPerKill");
-            lifeSteal.flatHpPerHit = pb.flatHpPerHit + k("flatHpPerHit");
-            lifeSteal.percentageOfDamageDealtHeal = pb.percentageOfDamageDealtHeal + k("percentageOfDamageDealtHeal");
-        } else{
-            if(k("flatHpPerKill") != 0f || k("flatHpPerKill") != 0 || k("flatHpPerKill") != 0){
-                lifeSteal = getEngine().createComponent(LifeStealComponent.class);
-                lifeSteal.flatHpPerKill = pb.flatHpPerKill + k("flatHpPerKill");
-                lifeSteal.flatHpPerHit = pb.flatHpPerHit + k("flatHpPerHit");
-                lifeSteal.percentageOfDamageDealtHeal = pb.percentageOfDamageDealtHeal + k("percentageOfDamageDealtHeal");
-                player.add(lifeSteal);
-            }
+        // ── 12. Write last stand ─────────────────────
+
+        if (lastStand != null && lastStand.isActive) {
+            off.damageMultiplier += lastStand.damageMultiplier;
+            off.critChance = MathUtils.clamp(lastStand.critChance + off.critChance, config.critChanceFloor,
+                config.critChanceCeiling);
+            mov.maxSpeed *= (1.0f + lastStand.moveSpeedMultiplier);
+            wpn.projectileCount += lastStand.projectileCount;
         }
 
         //FOR DEBUG
@@ -231,9 +222,6 @@ public class StatRecalculationSystem extends EntitySystem {
     private float d(String key) {return statDeltas.get(key, 0f);}
 
     private float t(String key) {return traitDeltas.get(key, 0f);}
-
-    private float k(String key) {return onKillDeltas.get(key, 0f);}
-
 
     //FOR DEBUG
 

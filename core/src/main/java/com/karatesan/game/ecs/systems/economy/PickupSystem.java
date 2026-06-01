@@ -20,7 +20,7 @@ public class PickupSystem extends IteratingSystem implements PausableSystem {
     private final ComponentMapper<XpComponent> xm = ComponentMapper.getFor(XpComponent.class);
     private final ComponentMapper<SessionComponent> sm = ComponentMapper.getFor(SessionComponent.class);
 
-    private GameContext context;
+    private final GameContext context;
 
     public PickupSystem(GameContext context) {
         super(Family.all(CollectibleComponent.class, TransformComponent.class, HitboxComponent.class).get());

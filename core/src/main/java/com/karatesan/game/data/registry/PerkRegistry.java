@@ -1,21 +1,25 @@
 package com.karatesan.game.data.registry;
 
+import com.badlogic.ashley.core.Engine;
+import com.badlogic.ashley.core.Entity;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.FloatArray;
-import com.badlogic.gdx.utils.Json;
-import com.badlogic.gdx.utils.ObjectMap;
+import com.badlogic.gdx.utils.*;
+import com.karatesan.game.data.perk.*;
+import com.karatesan.game.data.perk.handlers.BloodthirstPerkHandler;
+import com.karatesan.game.data.perk.handlers.LastStandPerkHandler;
+import com.karatesan.game.data.perk.handlers.PerkHandler;
 import com.karatesan.game.ecs.components.perks.PerkInventoryComponent;
-import com.karatesan.game.data.perk.PerkDefinition;
-import com.karatesan.game.data.perk.PerkOffer;
-import com.karatesan.game.data.perk.Rarity;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class PerkRegistry {
     private final ObjectMap<String, PerkDefinition> perks = new ObjectMap<>();
+    private final Map<String, PerkHandler> handlers = new HashMap<>();
+
     //TODO remove once all perks are working
-    private final Array<String> included = new Array<>(new String[]{
-        "bloodthirst"
+    private final Array<String> included = new Array<>(new String[]{"bloodthirst", "last_stand"
 //        // COMMON
 //        "surgical_precision", "extended_barrel", "depleted_uranium", "thick_skin", "second_wind", "magnetic_field", "fast_learner",
 //        // UNCOMMON
@@ -26,14 +30,79 @@ public class PerkRegistry {
 //        "juggernaut"
     });
 
-    public PerkRegistry(FileHandle file) {
-        Json json = new Json();
-        json.setIgnoreUnknownFields(true);
+    public PerkRegistry(FileHandle file, BlueprintRegistry blueprints) {
+        JsonValue root = new JsonReader().parse(file);
 
-        PerkDefinition[] definitions = json.fromJson(PerkDefinition[].class, file);
-        for (PerkDefinition def : definitions) {
-            if (included.contains(def.id, false)) perks.put(def.id, def);
+        for (JsonValue perkNode = root.child; perkNode != null; perkNode = perkNode.next) {
+            PerkDefinition def = parsePerk(perkNode);
+            if (included.contains(def.id, false)) {
+                perks.put(def.id, def);
+            }
         }
+        registerHandler("bloodthirst", new BloodthirstPerkHandler(blueprints.getPlayer()));
+        registerHandler("last_stand", new LastStandPerkHandler());
+    }
+
+    public void registerHandler(String perkId, PerkHandler handler) {
+        handlers.put(perkId, handler);
+    }
+
+    public void applyPerk(Entity player, String perkId, int level, Engine engine) {
+        PerkHandler perkHandler = handlers.get(perkId);
+        if (perkHandler == null) return;
+        perkHandler.onAcquire(player, level, perks.get(perkId).levels, engine);
+    }
+
+    private PerkDefinition parsePerk(JsonValue node) {
+        PerkDefinition def = new PerkDefinition();
+        def.id = node.getString("id");
+        def.name = node.getString("name");
+        def.description = node.getString("description");
+        def.rarity = Rarity.valueOf(node.getString("rarity"));
+        def.maxLevel = node.getInt("maxLevel");
+
+        JsonValue levelsNode = node.get("levels");
+        def.levels = new PerkLevel[levelsNode.size];
+
+        int i = 0;
+        for (JsonValue levelNode = levelsNode.child; levelNode != null; levelNode = levelNode.next) {
+            def.levels[i++] = parseLevel(levelNode);
+        }
+
+        assert def.levels.length == def.maxLevel : "Perk " + def.id + " maxLevel=" + def.maxLevel + " but has " + def.levels.length + " levels";
+
+        return def;
+    }
+
+    private PerkLevel parseLevel(JsonValue node) {
+        PerkLevel level = new PerkLevel();
+        level.level = node.getInt("level");
+        level.levelUpDescription = node.getString("levelUpDescription");
+        level.statEffects = new Array<>();
+
+        JsonValue effectsNode = node.get("effects");
+        JsonValue behavioralHead = null;  // first behavioral effect, used to detect presence
+
+        for (JsonValue effectNode = effectsNode.child; effectNode != null; effectNode = effectNode.next) {
+            String typeStr = effectNode.getString("type");
+
+            if ("STAT_MODIFIER".equals(typeStr) || "TRAIT_ADDITION".equals(typeStr)) {
+                level.statEffects.add(new PerkEffect(PerkEffectType.valueOf(typeStr), effectNode.getString("target"),
+                    effectNode.getFloat("value")));
+            } else {
+                if (behavioralHead == null) behavioralHead = effectNode;
+            }
+        }
+
+        // If any behavioral effect existed, hand the WHOLE effects array to the handler.
+        // Handlers filter for the types they care about.
+        if (behavioralHead != null) {
+            level.behavioralConfig = effectsNode;
+        }
+
+        assert level.statEffects.size > 0 || level.behavioralConfig != null : "Level " + level.level + " has no effects at all";
+
+        return level;
     }
 
     public PerkDefinition get(String id) {

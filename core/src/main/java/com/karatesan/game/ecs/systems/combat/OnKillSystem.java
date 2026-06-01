@@ -12,9 +12,12 @@ import com.karatesan.game.ecs.components.perks.LifeStealComponent;
 import com.karatesan.game.ecs.components.stats.HealthComponent;
 import com.karatesan.game.ecs.components.tag.PendingRemovalComponent;
 
-public class PostKillSystem extends IteratingSystem {
-
-    public PostKillSystem() {
+/**
+ * Post kill attacker effects - what happens to a killer
+ */
+public class OnKillSystem extends IteratingSystem {
+//TODO try to merge with onDeathSystem - but after dot system is ceated to check if it ll have attacker set in hiteventcomponent
+    public OnKillSystem() {
         super(Family.all(HitEventComponent.class, ResolvedHitComponent.class).get());
     }
 
@@ -23,7 +26,9 @@ public class PostKillSystem extends IteratingSystem {
         HitEventComponent hitEvent = Mappers.hitEvent.get(entity);
 
         if (hitEvent.outcome.equals(HitOutcome.KILLED) && Mappers.player.has(hitEvent.attacker)) {
+
             LifeStealComponent lifeSteal = Mappers.lifeSteal.get(hitEvent.attacker);
+
             if (lifeSteal != null) {
                 DebugDisplay.logDebug(String.valueOf(lifeSteal.flatHpPerKill));
                 HealthComponent health = Mappers.health.get(hitEvent.attacker);
